@@ -1,0 +1,1428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Fiefdom &middot; AppADay 075</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#12161f;--ink2:#171d29;--panel:#1c2431;--panel2:#222c3c;--line:#33405a;
+    --parch:#e9dcc0;--parch2:#d9c8a4;--parchline:#b7a279;
+    --brass:#c8974a;--brass-bright:#e8b45f;--ember:#d8613a;
+    --text:#e7ecf5;--muted:#93a1bb;--dim:#697692;--good:#5cc08a;
+    --ocean:#183048;--ocean2:#12233a;--neutral:#6b7385;
+    --crop:#8fce6a;--steel:#9fb4cc;--gas:#e0954f;
+    --shadow:0 18px 44px rgba(0,0,0,.55);
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;padding:0}
+  body{
+    font-family:'Inter',system-ui,sans-serif;
+    background:radial-gradient(1200px 700px at 50% -10%,#1e2736 0%,transparent 60%),radial-gradient(900px 600px at 100% 110%,#191b2a 0%,transparent 55%),var(--ink);
+    color:var(--text);min-height:100dvh;display:flex;flex-direction:column;overflow-x:hidden;
+  }
+  button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+  .cz{font-family:'Cinzel',serif}
+  .topbar{display:flex;align-items:center;gap:12px;padding:9px 15px;border-bottom:1px solid var(--line);background:linear-gradient(180deg,rgba(24,31,44,.9),rgba(18,22,31,.75));flex-shrink:0}
+  .badge{font-family:'Cinzel',serif;font-weight:700;font-size:11px;letter-spacing:2px;color:var(--ink);background:linear-gradient(180deg,var(--brass-bright),var(--brass));padding:5px 9px;border-radius:6px}
+  .wordmark{font-family:'Cinzel',serif;font-weight:700;font-size:18px;letter-spacing:3px;color:var(--parch)}
+  .wordmark span{color:var(--brass-bright)}
+  .home{margin-left:auto;font-size:12px;color:var(--muted);text-decoration:none;letter-spacing:.5px;border:1px solid var(--line);padding:6px 11px;border-radius:7px}
+  .home:hover{color:var(--text);border-color:var(--brass)}
+  .shell{flex:1;display:flex;flex-direction:column;min-height:0}
+
+  /* setup */
+  .setup{flex:1;display:flex;align-items:center;justify-content:center;padding:22px 16px}
+  .setup-card{width:100%;max-width:520px;background:linear-gradient(180deg,var(--panel),var(--ink2));border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);padding:28px 26px 24px}
+  .crest{width:62px;height:62px;margin:0 auto 12px;display:flex;align-items:center;justify-content:center;border-radius:50%;background:radial-gradient(circle at 50% 35%,#2b3548,#161d29);border:2px solid var(--brass);box-shadow:0 0 0 4px rgba(200,151,74,.12),var(--shadow)}
+  .crest svg{width:34px;height:34px}
+  .setup h1{font-family:'Cinzel',serif;font-weight:700;font-size:30px;letter-spacing:4px;text-align:center;margin:0 0 4px;color:var(--parch)}
+  .setup .sub{text-align:center;color:var(--muted);font-size:13px;margin:0 0 20px;line-height:1.5}
+  .setup .sub b{color:var(--brass-bright);font-weight:600}
+  .field{margin-bottom:16px}
+  .field-label{font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:var(--dim);margin-bottom:8px;font-weight:600;display:flex;justify-content:space-between}
+  .field-label span{color:var(--parch);font-weight:700;letter-spacing:.5px;text-transform:none}
+  .opts{display:flex;gap:8px}
+  .opt{flex:1;text-align:center;padding:11px 6px;border-radius:10px;border:1px solid var(--line);background:var(--panel2);color:var(--muted);font-weight:600;font-size:14px;transition:.15s}
+  .opt small{display:block;font-weight:500;font-size:10px;color:var(--dim);margin-top:2px}
+  .opt.on{border-color:var(--brass);background:linear-gradient(180deg,rgba(200,151,74,.22),rgba(200,151,74,.06));color:var(--parch)}
+  .opt.on small{color:var(--brass-bright)}
+  .cnt{display:flex;align-items:center;gap:12px}
+  .cnt .cbtn{width:42px;height:42px;border-radius:11px;background:var(--panel2);border:1px solid var(--line);font-size:22px;font-weight:700;color:var(--parch)}
+  .cnt .cbtn:active{background:var(--brass);color:var(--ink)}
+  .cnt .cval{flex:1;text-align:center;font-size:22px;font-weight:800;color:var(--parch)}
+  .cnt .cval small{display:block;font-size:10px;color:var(--dim);letter-spacing:1px;text-transform:uppercase;font-weight:600}
+  .startbtn{width:100%;margin-top:8px;padding:15px;border-radius:12px;font-family:'Cinzel',serif;font-weight:700;letter-spacing:2px;font-size:16px;color:var(--ink);background:linear-gradient(180deg,var(--brass-bright),var(--brass));box-shadow:0 6px 18px rgba(200,151,74,.3);transition:.15s}
+  .startbtn:hover{transform:translateY(-1px)}
+  .resume{width:100%;margin-top:10px;padding:12px;border-radius:11px;font-weight:600;font-size:13.5px;color:var(--muted);border:1px solid var(--line);background:var(--panel2)}
+  .resume:hover{color:var(--text);border-color:var(--brass)}
+  .rules{margin-top:18px;padding-top:16px;border-top:1px solid var(--line);font-size:12px;color:var(--dim);line-height:1.65}
+  .rules b{color:var(--muted);font-weight:600}
+
+  /* game */
+  .game{flex:1;display:none;flex-direction:column;min-height:0}
+  .game.on{display:flex}
+  .turnbar{display:flex;align-items:center;gap:9px;padding:7px 13px;flex-shrink:0;border-bottom:1px solid var(--line);background:rgba(18,23,33,.7)}
+  .turn-dot{width:12px;height:12px;border-radius:50%;box-shadow:0 0 0 3px rgba(255,255,255,.06),0 0 12px currentColor;flex-shrink:0}
+  .turn-name{font-family:'Cinzel',serif;font-weight:600;font-size:14px;letter-spacing:1px}
+  .turn-name em{font-style:normal;color:var(--dim);font-size:11px;margin-left:5px;letter-spacing:.5px}
+  .phase-pill{margin-left:auto;font-size:10.5px;letter-spacing:1.3px;text-transform:uppercase;font-weight:700;padding:5px 10px;border-radius:20px;border:1px solid var(--brass);color:var(--brass-bright);background:rgba(200,151,74,.1);white-space:nowrap}
+  .menu-btn{font-size:17px;color:var(--muted);padding:2px 5px;line-height:1}
+  .menu-btn:hover{color:var(--text)}
+
+  .hudbar{display:flex;gap:7px;padding:7px 11px;flex-shrink:0;overflow-x:auto;background:rgba(23,29,41,.6);border-bottom:1px solid var(--line);scrollbar-width:none}
+  .hudbar::-webkit-scrollbar{display:none}
+  .res{display:flex;align-items:center;gap:5px;padding:4px 9px;border-radius:8px;background:var(--panel2);border:1px solid var(--line);flex-shrink:0}
+  .res .ri{width:9px;height:9px;border-radius:2px}
+  .res .rv{font-size:13.5px;font-weight:800;color:var(--parch);font-variant-numeric:tabular-nums}
+  .res .rl{font-size:9.5px;color:var(--dim);text-transform:uppercase;letter-spacing:.6px;font-weight:600}
+
+  .maparea{flex:1;min-height:0;position:relative;overflow:hidden}
+  svg.map{width:100%;height:100%;display:block;touch-action:manipulation}
+  .cell{stroke:#0c1420;stroke-width:1.4;stroke-linejoin:round;transition:fill .2s}
+  .cell.water{stroke:#122636}
+  .cell.crater{stroke:#3a2a22;cursor:default}
+  .cell.pick{cursor:pointer}
+  .cell.sel{stroke:var(--parch);stroke-width:3.4;filter:drop-shadow(0 0 5px var(--brass-bright))}
+  .cell.tgt{stroke:var(--ember);stroke-width:3;stroke-dasharray:5 3}
+  .cnt-pill{fill:#0d131d;stroke-width:2}
+  .cnt-txt{font-family:'Inter';font-weight:800;text-anchor:middle;fill:var(--parch);pointer-events:none;font-variant-numeric:tabular-nums}
+  .bglyph{font-family:'Inter';font-weight:800;text-anchor:middle;pointer-events:none}
+  .asset{pointer-events:none}
+
+  .actionbar{flex-shrink:0;border-top:1px solid var(--line);background:linear-gradient(180deg,rgba(28,36,49,.96),rgba(18,23,33,.98));padding:9px 11px calc(9px + env(safe-area-inset-bottom))}
+  .hint{font-size:12.5px;color:var(--muted);text-align:center;line-height:1.35;margin-bottom:8px;min-height:17px}
+  .hint b{color:var(--brass-bright);font-weight:600}
+  .btn-row{display:flex;gap:8px}
+  .abtn{flex:1;padding:12px 6px;border-radius:11px;font-weight:700;font-size:13.5px;letter-spacing:.3px;background:var(--panel2);border:1px solid var(--line);color:var(--text);transition:.13s}
+  .abtn:hover:not(:disabled){border-color:var(--brass);color:var(--parch)}
+  .abtn.primary{background:linear-gradient(180deg,var(--brass-bright),var(--brass));color:var(--ink);border-color:transparent}
+  .abtn.primary:hover:not(:disabled){transform:translateY(-1px)}
+  .abtn:disabled{opacity:.4;cursor:not-allowed}
+  .abtn small{display:block;font-weight:600;font-size:9.5px;color:inherit;opacity:.75;margin-top:1px}
+
+  /* bottom sheet */
+  .sheet{position:fixed;left:0;right:0;bottom:0;z-index:45;background:linear-gradient(180deg,var(--panel),var(--ink2));border-top:1px solid var(--brass);border-radius:18px 18px 0 0;box-shadow:0 -14px 40px rgba(0,0,0,.5);transform:translateY(102%);transition:transform .26s cubic-bezier(.4,0,.2,1);padding:16px 16px calc(16px + env(safe-area-inset-bottom));max-height:74dvh;overflow-y:auto}
+  .sheet.on{transform:translateY(0)}
+  .sheet-head{display:flex;align-items:center;gap:9px;margin-bottom:12px}
+  .sheet-head .sh-dot{width:12px;height:12px;border-radius:50%}
+  .sheet-head h3{font-family:'Cinzel',serif;margin:0;font-size:16px;letter-spacing:1px;color:var(--parch)}
+  .sheet-head .sh-sub{font-size:11.5px;color:var(--dim);margin-left:auto;text-align:right;line-height:1.3}
+  .sheet-head .x{font-size:22px;color:var(--muted);padding:0 4px;margin-left:6px}
+  .grp{margin-bottom:14px}
+  .grp-t{font-size:10px;text-transform:uppercase;letter-spacing:1.4px;color:var(--dim);font-weight:700;margin-bottom:8px}
+  .chips{display:flex;gap:7px;flex-wrap:wrap}
+  .chip{flex:1;min-width:84px;padding:10px 8px;border-radius:10px;border:1px solid var(--line);background:var(--panel2);color:var(--text);font-weight:600;font-size:13px;text-align:center;transition:.13s}
+  .chip small{display:block;font-size:10px;color:var(--dim);margin-top:2px;font-weight:500}
+  .chip.on{border-color:var(--brass);background:linear-gradient(180deg,rgba(200,151,74,.2),rgba(200,151,74,.05));color:var(--parch)}
+  .chip.on small{color:var(--brass-bright)}
+  .chip:disabled{opacity:.4}
+  .chip.crop.on{border-color:var(--crop)} .chip.steel.on{border-color:var(--steel)} .chip.gas.on{border-color:var(--gas)}
+  .rowbtns{display:flex;gap:8px;margin-top:8px}
+
+  /* modal */
+  .scrim{position:fixed;inset:0;background:rgba(8,11,17,.72);backdrop-filter:blur(3px);z-index:50;display:none;align-items:center;justify-content:center;padding:18px}
+  .scrim.on{display:flex}
+  .modal{width:100%;max-width:420px;background:linear-gradient(180deg,var(--panel),var(--ink2));border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);padding:22px 22px 20px;max-height:90dvh;overflow-y:auto}
+  .modal h2{font-family:'Cinzel',serif;font-size:19px;letter-spacing:1.4px;margin:0 0 4px;text-align:center;color:var(--parch)}
+  .modal .msub{text-align:center;color:var(--muted);font-size:12.5px;margin:0 0 16px}
+  .modal .msub b{color:var(--parch)}
+  .fight{display:flex;align-items:stretch;gap:12px;margin:4px 0 14px}
+  .fside{flex:1;text-align:center}
+  .fside .flabel{font-size:10.5px;text-transform:uppercase;letter-spacing:1.2px;font-weight:700;margin-bottom:3px}
+  .fside .fterr{font-size:11.5px;color:var(--muted);margin-bottom:9px;min-height:14px}
+  .dice{display:flex;gap:5px;justify-content:center;min-height:36px}
+  .die{width:32px;height:32px;border-radius:8px;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);padding:4px;background:var(--parch);box-shadow:0 2px 5px rgba(0,0,0,.4)}
+  .die.rolling{animation:shake .5s ease}
+  @keyframes shake{0%,100%{transform:translateY(0) rotate(0)}25%{transform:translateY(-4px) rotate(-8deg)}75%{transform:translateY(-2px) rotate(7deg)}}
+  .pip{width:6px;height:6px;border-radius:50%;background:#1a1e28;align-self:center;justify-self:center}
+  .die.lose{opacity:.45;background:var(--parch2)}
+  .die.win{box-shadow:0 0 0 2px var(--good),0 2px 6px rgba(0,0,0,.4)}
+  .die.def{background:#d6c4e0}
+  .vs{display:flex;align-items:center;font-family:'Cinzel',serif;color:var(--dim);font-size:12px}
+  .fresult{text-align:center;font-size:13px;color:var(--muted);min-height:19px;margin-bottom:14px}
+  .fresult b{color:var(--parch)}
+  .stepper{display:flex;align-items:center;justify-content:center;gap:16px;margin:12px 0 18px}
+  .stepbtn{width:44px;height:44px;border-radius:11px;background:var(--panel2);border:1px solid var(--line);font-size:22px;font-weight:700;color:var(--parch)}
+  .stepbtn:active{background:var(--brass);color:var(--ink)}
+  .stepval{font-size:32px;font-weight:800;min-width:66px;text-align:center;color:var(--parch);font-variant-numeric:tabular-nums}
+  .stepval small{display:block;font-size:10.5px;font-weight:600;color:var(--dim);letter-spacing:1px;text-transform:uppercase}
+  .mbtns{display:flex;gap:9px}
+  .mbtn{flex:1;padding:12px;border-radius:11px;font-weight:700;font-size:13.5px;border:1px solid var(--line);background:var(--panel2);color:var(--text)}
+  .mbtn.primary{background:linear-gradient(180deg,var(--brass-bright),var(--brass));color:var(--ink);border-color:transparent}
+  .mbtn:disabled{opacity:.4}
+  .mkt-row{display:flex;align-items:center;gap:10px;padding:10px;border-radius:10px;background:var(--panel2);margin-bottom:8px}
+  .mkt-row .mk-i{width:11px;height:11px;border-radius:3px;flex-shrink:0}
+  .mkt-row .mk-n{font-weight:700;font-size:13px}
+  .mkt-row .mk-n small{display:block;font-weight:500;font-size:10.5px;color:var(--dim)}
+  .mkt-row .mk-a{margin-left:auto;font-weight:800;color:var(--parch);font-variant-numeric:tabular-nums}
+  .mkt-sell{display:flex;gap:5px;margin-top:6px}
+  .mkt-sell button{flex:1;padding:8px 4px;border-radius:8px;font-size:11.5px;font-weight:700;background:var(--panel);border:1px solid var(--line);color:var(--muted)}
+  .mkt-sell button:active{border-color:var(--brass);color:var(--parch)}
+
+  /* drawer */
+  .drawer{position:fixed;top:0;right:0;height:100dvh;width:min(340px,88vw);z-index:48;background:linear-gradient(180deg,var(--panel),var(--ink2));border-left:1px solid var(--line);box-shadow:var(--shadow);transform:translateX(102%);transition:transform .28s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column}
+  .drawer.on{transform:translateX(0)}
+  .drawer-head{display:flex;align-items:center;padding:15px 17px;border-bottom:1px solid var(--line)}
+  .drawer-head h3{font-family:'Cinzel',serif;margin:0;font-size:15px;letter-spacing:1.4px;color:var(--parch)}
+  .drawer-head .x{margin-left:auto;font-size:21px;color:var(--muted);padding:0 4px}
+  .drawer-body{flex:1;overflow-y:auto;padding:13px 15px}
+  .std-title{font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:var(--dim);font-weight:700;margin:2px 0 9px}
+  .std-title:not(:first-child){margin-top:18px}
+  .pl-row{display:flex;align-items:center;gap:9px;padding:8px 9px;border-radius:9px;margin-bottom:6px;background:var(--panel2);border:1px solid transparent}
+  .pl-row.dead{opacity:.4}.pl-row.turn{border-color:var(--brass)}
+  .pl-dot{width:11px;height:11px;border-radius:50%;flex-shrink:0}
+  .pl-nm{font-weight:600;font-size:13px}
+  .pl-nm em{font-style:normal;color:var(--dim);font-weight:500;font-size:10.5px;margin-left:5px}
+  .pl-stat{margin-left:auto;font-size:11.5px;color:var(--muted);font-variant-numeric:tabular-nums;text-align:right;line-height:1.3}
+  .pl-stat b{color:var(--parch);font-weight:700}
+  .log{list-style:none;margin:0;padding:0;font-size:12px;line-height:1.5}
+  .log li{padding:6px 0;border-bottom:1px solid rgba(51,64,90,.4);color:var(--muted)}
+  .log li b{font-weight:700}
+  .log li.big{color:var(--parch)}
+
+  /* pass / victory */
+  .pass{position:fixed;inset:0;z-index:55;background:linear-gradient(180deg,var(--ink2),var(--ink));display:none;flex-direction:column;align-items:center;justify-content:center;padding:30px;text-align:center}
+  .pass.on{display:flex}
+  .pass .pdot{width:70px;height:70px;border-radius:50%;margin-bottom:18px;box-shadow:0 0 0 6px rgba(255,255,255,.05),0 0 30px currentColor}
+  .pass h2{font-family:'Cinzel',serif;font-size:26px;letter-spacing:2px;margin:0 0 6px;color:var(--parch)}
+  .pass p{color:var(--muted);font-size:14px;margin:0 0 26px}
+  .pass button{padding:14px 40px;border-radius:12px;font-family:'Cinzel',serif;font-weight:700;letter-spacing:2px;font-size:15px;color:var(--ink);background:linear-gradient(180deg,var(--brass-bright),var(--brass))}
+  .vic{text-align:center}
+  .vic .vcrest{width:78px;height:78px;margin:0 auto 12px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:3px solid var(--brass);background:radial-gradient(circle at 50% 35%,#2b3548,#141a25)}
+  .vic .vcrest svg{width:44px;height:44px}
+  .vic h2{font-size:24px;margin-bottom:6px}
+  .vic p{color:var(--muted);font-size:13.5px;margin:0 0 18px;line-height:1.5}
+  .ribbon{display:inline-block;margin-top:10px;font-size:10px;letter-spacing:1.3px;text-transform:uppercase;color:var(--brass-bright);border:1px solid rgba(200,151,74,.4);border-radius:20px;padding:5px 12px;font-weight:600}
+  .toast{position:fixed;left:50%;bottom:calc(120px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(20px);background:var(--ink);border:1px solid var(--brass);color:var(--parch);padding:9px 17px;border-radius:24px;font-size:12.5px;font-weight:600;box-shadow:var(--shadow);opacity:0;pointer-events:none;transition:.3s;z-index:60;max-width:90vw;text-align:center}
+  .toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+  @media(max-width:560px){.wordmark{font-size:16px}}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <span class="badge">AppADay 075</span>
+  <span class="wordmark cz">FIEF<span>DOM</span></span>
+  <a class="home" href="https://augustineiacopelli.github.io/appaday/" target="_blank" rel="noopener">Portfolio</a>
+</div>
+
+<div class="shell">
+  <!-- SETUP -->
+  <div class="setup" id="setup">
+    <div class="setup-card">
+      <div class="crest"><svg viewBox="0 0 24 24" fill="none"><path d="M12 2l7 3v6c0 4.5-3 8-7 11-4-3-7-6.5-7-11V5l7-3z" fill="#2b3548" stroke="#c8974a" stroke-width="1.3"/><path d="M12 6v11M8 10h8" stroke="#e8b45f" stroke-width="1.3" stroke-linecap="round"/></svg></div>
+      <h1>FIEFDOM</h1>
+      <p class="sub">A realm of <b>land and sea</b>. Grow crops, forge steel, refine gas. Raise fleets, feed armies, and conquer the map. Risk and Monopoly, fused.</p>
+      <div class="field">
+        <div class="field-label">Humans <span id="hLbl">1</span></div>
+        <div class="cnt"><button class="cbtn" onclick="adjP('h',-1)">&minus;</button><div class="cval" id="hVal">1<small>at this device</small></div><button class="cbtn" onclick="adjP('h',1)">+</button></div>
+      </div>
+      <div class="field">
+        <div class="field-label">Rival houses (AI) <span id="aLbl">2</span></div>
+        <div class="cnt"><button class="cbtn" onclick="adjP('a',-1)">&minus;</button><div class="cval" id="aVal">2<small id="totLbl">3 houses total</small></div><button class="cbtn" onclick="adjP('a',1)">+</button></div>
+      </div>
+      <div class="field">
+        <div class="field-label">AI cunning</div>
+        <div class="opts" id="diffOpts">
+          <button class="opt" data-d="squire">Squire<small>gentle</small></button>
+          <button class="opt on" data-d="knight">Knight<small>even</small></button>
+          <button class="opt" data-d="warlord">Warlord<small>ruthless</small></button>
+        </div>
+      </div>
+      <button class="startbtn" onclick="startGame()">RAISE YOUR BANNER</button>
+      <button class="resume" id="resumeBtn" style="display:none" onclick="resumeGame()">Resume last campaign</button>
+      <div class="rules">
+        <b>Court:</b> collect income, set each land to a farm, mill, or refinery, muster and hire troops, build ships and arms. <b>March:</b> attack across borders and by sea. <b>Maneuver:</b> one fortify move. Feed every troop each turn or risk desertion. Outlast every rival house to rule, but if more than five nukes ever detonate, nuclear winter ends the world and all lose.
+      </div>
+    </div>
+  </div>
+
+  <!-- GAME -->
+  <div class="game" id="game">
+    <div class="turnbar">
+      <span class="turn-dot" id="turnDot"></span>
+      <span class="turn-name cz" id="turnName">Crown <em>Round 1</em></span>
+      <span class="phase-pill" id="phasePill">Court</span>
+      <button class="menu-btn" onclick="openDrawer()" title="Standings">&#9776;</button>
+    </div>
+    <div class="hudbar" id="hud"></div>
+    <div class="maparea"><svg class="map" id="map" viewBox="0 0 1000 680" preserveAspectRatio="xMidYMid meet"></svg></div>
+    <div class="actionbar">
+      <div class="hint" id="hint"></div>
+      <div class="btn-row" id="phaseBtns"></div>
+    </div>
+  </div>
+</div>
+
+<!-- bottom sheet -->
+<div class="sheet" id="sheet"></div>
+<!-- drawer -->
+<div class="drawer" id="drawer">
+  <div class="drawer-head"><h3>THE REALM</h3><button class="x" onclick="closeDrawer()">&times;</button></div>
+  <div class="drawer-body" id="drawerBody"></div>
+</div>
+<!-- modal -->
+<div class="scrim" id="scrim"><div class="modal" id="modal"></div></div>
+<!-- pass screen -->
+<div class="pass" id="pass">
+  <div class="pdot" id="passDot"></div>
+  <h2 id="passName">Crown</h2>
+  <p id="passSub">Pass the device. Then take your turn.</p>
+  <button onclick="beginHumanTurn()">I AM READY</button>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>// ---- Fiefdom II world generator: Voronoi territories, oceans, coasts, sea routes ----
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;var t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+
+function clipHalf(poly, nx, ny, c){
+  const out=[]; const n=poly.length;
+  for(let i=0;i<n;i++){
+    const A=poly[i], B=poly[(i+1)%n];
+    const da=nx*A.x+ny*A.y-c, db=nx*B.x+ny*B.y-c;
+    if(da>=0) out.push(A);
+    if((da>0&&db<0)||(da<0&&db>0)){
+      const t=da/(da-db);
+      out.push({x:A.x+t*(B.x-A.x), y:A.y+t*(B.y-A.y)});
+    }
+  }
+  return out;
+}
+
+function polyCentroid(poly){
+  let a=0,cx=0,cy=0;
+  for(let i=0;i<poly.length;i++){
+    const A=poly[i], B=poly[(i+1)%poly.length];
+    const cr=A.x*B.y-B.x*A.y; a+=cr; cx+=(A.x+B.x)*cr; cy+=(A.y+B.y)*cr;
+  }
+  a*=0.5; if(Math.abs(a)<1e-6){
+    let sx=0,sy=0; poly.forEach(p=>{sx+=p.x;sy+=p.y;}); return {x:sx/poly.length,y:sy/poly.length};
+  }
+  return {x:cx/(6*a), y:cy/(6*a)};
+}
+
+function voronoiCell(site, sites, W, H){
+  let poly=[{x:0,y:0},{x:W,y:0},{x:W,y:H},{x:0,y:H}];
+  for(const o of sites){
+    if(o===site)continue;
+    const dx=o.x-site.x, dy=o.y-site.y;
+    const mx=(o.x+site.x)/2, my=(o.y+site.y)/2;
+    const nx=-dx, ny=-dy; const c=nx*mx+ny*my;
+    poly=clipHalf(poly,nx,ny,c);
+    if(poly.length<3)break;
+  }
+  return poly;
+}
+
+function generateWorld(seed, targetCells){
+  const R=mulberry32(seed);
+  const W=1000, H=680;
+  const aspect=W/H;
+  let rows=Math.max(4,Math.round(Math.sqrt(targetCells/aspect)));
+  let cols=Math.max(4,Math.round(targetCells/rows));
+  const sites=[];
+  const cw=W/cols, ch=H/rows;
+  for(let r=0;r<rows;r++)for(let cc=0;cc<cols;cc++){
+    const jx=(R()*0.62+0.19)*cw, jy=(R()*0.62+0.19)*ch;
+    sites.push({x:cc*cw+jx, y:r*ch+jy});
+  }
+  const N=sites.length;
+  for(let pass=0;pass<2;pass++){
+    const cells=sites.map(s=>voronoiCell(s,sites,W,H));
+    for(let i=0;i<N;i++){ if(cells[i].length>2){ const c=polyCentroid(cells[i]); sites[i].x=c.x; sites[i].y=c.y; } }
+  }
+  const cells=sites.map(s=>voronoiCell(s,sites,W,H));
+
+  const blobs=[]; const nb=2+Math.round(R()*1.4);
+  for(let b=0;b<nb;b++) blobs.push({x:W*(0.25+R()*0.5), y:H*(0.25+R()*0.5), r:H*(0.34+R()*0.22)});
+  function landValue(x,y){
+    let v=0;
+    for(const bl of blobs){ const d=Math.hypot(x-bl.x,y-bl.y); v+=Math.max(0,1-(d/bl.r)); }
+    const ex=Math.min(x,W-x)/(W*0.5), ey=Math.min(y,H-y)/(H*0.5);
+    const edge=Math.min(1, Math.min(ex,ey)/0.28);
+    return v*edge + (R()*0.18-0.09);
+  }
+  const cx=sites.map((s,i)=>polyCentroid(cells[i]));
+  let vals=sites.map((s,i)=>landValue(cx[i].x,cx[i].y));
+  const landFrac=0.66;
+  const sorted=[...vals].sort((a,b)=>a-b);
+  const thr=sorted[Math.floor((1-landFrac)*N)];
+  const water=vals.map(v=>v<thr);
+
+  const adj=Array.from({length:N},()=>new Set());
+  for(let i=0;i<N;i++){
+    const poly=cells[i]; if(poly.length<3)continue;
+    for(let e=0;e<poly.length;e++){
+      const A=poly[e], B=poly[(e+1)%poly.length];
+      const mx=(A.x+B.x)/2, my=(A.y+B.y)/2;
+      const dOwn=Math.hypot(mx-sites[i].x,my-sites[i].y);
+      let best=-1,bd=1e9;
+      for(let j=0;j<N;j++){ if(j===i)continue; const d=Math.hypot(mx-sites[j].x,my-sites[j].y); if(d<bd){bd=d;best=j;} }
+      if(best>=0 && Math.abs(bd-dOwn) < 0.06*dOwn + 2){ adj[i].add(best); }
+    }
+  }
+  for(let i=0;i<N;i++)for(const j of adj[i])adj[j].add(i);
+
+  const comp=new Array(N).fill(-1); let nc=0;
+  for(let i=0;i<N;i++){ if(water[i]&&comp[i]<0){ const st=[i]; comp[i]=nc; while(st.length){ const u=st.pop(); for(const v of adj[u]){ if(water[v]&&comp[v]<0){comp[v]=nc;st.push(v);} } } nc++; } }
+
+  const landIdx=[]; for(let i=0;i<N;i++)if(!water[i])landIdx.push(i);
+
+  const coast=new Array(N).fill(false);
+  const touches=Array.from({length:N},()=>new Set());
+  for(const i of landIdx){ for(const j of adj[i]){ if(water[j]){ coast[i]=true; touches[i].add(comp[j]); } } }
+
+  const seaAdj=Array.from({length:N},()=>new Set());
+  const byComp={};
+  for(const i of landIdx){ for(const wc of touches[i]){ (byComp[wc]=byComp[wc]||[]).push(i); } }
+  for(const wc in byComp){ const arr=byComp[wc]; for(let a=0;a<arr.length;a++)for(let b=a+1;b<arr.length;b++){ seaAdj[arr[a]].add(arr[b]); seaAdj[arr[b]].add(arr[a]); } }
+
+  for(const i of landIdx){
+    const landN=[...adj[i]].some(j=>!water[j]);
+    const seaN=seaAdj[i].size>0;
+    if(!landN && !seaN){ water[i]=true; }
+  }
+
+  return {seed,W,H,N,
+    cells:cells.map(c=>c.map(p=>({x:+p.x.toFixed(1),y:+p.y.toFixed(1)}))),
+    centroid:cx.map(c=>({x:+c.x.toFixed(1),y:+c.y.toFixed(1)})),
+    water, coast,
+    adj:adj.map(s=>[...s]), seaAdj:seaAdj.map(s=>[...s]), comp};
+}
+
+if(typeof module!=='undefined') module.exports={generateWorld};
+</script>
+<script>// ===== Fiefdom II engine: economy, feeding, naval, weapons =====
+(function(root){
+'use strict';
+
+const C = {
+  CROP_MULT:4, STEEL_PER_MILL:2, GAS_PER_REFINERY:10,
+  FEED_PER_TROOP:1, STARVE_CHANCE:1/3,
+  SHIP_STEEL:10, SHIP_CAP:10, SHIP_MOVE_GAS:10,
+  LAUNCHER_STEEL:10, INTERCEPTOR_STEEL:10,
+  NUKE_FIRST_STEEL:20, NUKE_FIRST_PROB:0.5, NUKE_NEXT_STEEL:10,
+  ROCKET_FIRST_STEEL:20, ROCKET_FIRST_PROB:0.5, ROCKET_NEXT_STEEL:10,
+  NUKE_FIRE_GAS:25, ROCKET_FIRE_GAS:25, INTERCEPT_PROB:2/3, NUKE_HIT_PROB:2/3, WINTER_LIMIT:5,
+  MARCH_GAS_PER_TROOP:1,
+  BUILD_COST_COIN:6, BASE_TAX_PER_TERR:1,
+  HIRE_COIN:6, HIRE_TROOPS:2,
+  SELL:{ crops:0.25, steel:3, gas:0.2 },
+  COLORS:['#e8b45f','#d8503f','#4a8fd8','#5cae6a','#b57edc','#4fc4c0'],
+  NAMES:['Crown','Ember','Tide','Verdant','Amethyst','Aegis']
+};
+
+function rng(s){
+  let a=s.rseed|0; a=a+0x6D2B79F5|0; let t=Math.imul(a^a>>>15,1|a);
+  t=t+Math.imul(t^t>>>7,61|t)^t; s.rseed=a; return ((t^t>>>14)>>>0)/4294967296;
+}
+function d6(s){ return 1+Math.floor(rng(s)*6); }
+function chance(s,p){ return rng(s)<p; }
+function dist(s,a,b){ const A=s.centroid[a],B=s.centroid[b]; return Math.hypot(A.x-B.x,A.y-B.y); }
+function shuffle(s,arr){ for(let i=arr.length-1;i>0;i--){ const j=Math.floor(rng(s)*(i+1)); const t=arr[i];arr[i]=arr[j];arr[j]=t; } return arr; }
+
+function newGame(world, humans, ais, difficulty){
+  const totalP=humans+ais;
+  const s={
+    W:world.W,H:world.H,N:world.N,
+    cells:world.cells, centroid:world.centroid, water:world.water, coast:world.coast,
+    adj:world.adj, seaAdj:world.seaAdj,
+    owner:new Array(world.N).fill(-1),
+    troops:new Array(world.N).fill(0),
+    build:new Array(world.N).fill(''),
+    launcher:new Array(world.N).fill(false),
+    interceptor:new Array(world.N).fill(false),
+    crater:new Array(world.N).fill(false),
+    detonations:0, ended:null,
+    players:[], turn:0, phase:'build', round:1, log:[],
+    fortifyUsed:false, shipsUsed:0, reinf:0,
+    rseed:((world.seed>>>0)*2654435761)>>>0, winner:null
+  };
+  for(let p=0;p<totalP;p++){
+    s.players.push({ id:p, name:C.NAMES[p], color:C.COLORS[p], isAI:p>=humans, ai:difficulty,
+      alive:true, coin:24, crops:20, steel:10, gas:20, ships:0, nukes:0, rockets:0 });
+  }
+  const landIdx=[]; for(let i=0;i<s.N;i++) if(!s.water[i]) landIdx.push(i);
+  const starts=[]; const first=landIdx[Math.floor(rng(s)*landIdx.length)]; starts.push(first);
+  while(starts.length<totalP){
+    let best=-1,bestD=-1;
+    for(const i of landIdx){ if(starts.includes(i))continue; let md=1e9; for(const st of starts) md=Math.min(md,dist(s,i,st)); if(md>bestD){bestD=md;best=i;} }
+    starts.push(best);
+  }
+  const clusterSize=Math.max(2, Math.min(4, Math.floor(landIdx.length/(totalP*2.4))+2));
+  for(let p=0;p<totalP;p++){
+    const q=[starts[p]]; let placed=0; s.owner[starts[p]]=p; s.troops[starts[p]]=5; placed++;
+    while(q.length && placed<clusterSize){
+      const u=q.shift(); const ns=s.adj[u].filter(v=>!s.water[v]&&s.owner[v]<0); shuffle(s,ns);
+      for(const v of ns){ if(placed>=clusterSize)break; if(s.owner[v]<0){ s.owner[v]=p; s.troops[v]=3; placed++; q.push(v);} }
+    }
+  }
+  for(const i of landIdx){ if(s.owner[i]<0){ s.owner[i]=-1; s.troops[i]=1+Math.floor(rng(s)*3); } }
+  for(let p=0;p<totalP;p++){
+    const owned=landIdx.filter(i=>s.owner[i]===p);
+    if(owned[0]!==undefined) s.build[owned[0]]='farm';
+    if(owned[1]!==undefined) s.build[owned[1]]='refinery';
+    if(owned[2]!==undefined) s.build[owned[2]]='mill';
+  }
+  s.round=1; s.turn=0; s.phase='build'; s.fortifyUsed=false; s.shipsUsed=0;
+  beginTurn(s, s.turn);
+  return s;
+}
+
+function ownedLands(s,p){ const r=[]; for(let i=0;i<s.N;i++) if(s.owner[i]===p && !s.water[i]) r.push(i); return r; }
+function countBuild(s,p,type){ let n=0; for(let i=0;i<s.N;i++) if(s.owner[i]===p && s.build[i]===type) n++; return n; }
+function totalTroops(s,p){ let n=0; for(let i=0;i<s.N;i++) if(s.owner[i]===p) n+=s.troops[i]; return n; }
+function hasCoastalLand(s,p){ return ownedLands(s,p).some(i=>s.coast[i]); }
+function landNeighbors(s,i){ return s.adj[i].filter(j=>!s.water[j]); }
+function reinforcements(s,p){ const t=ownedLands(s,p).length; return Math.max(3, Math.floor(t/3)); }
+
+function beginTurn(s,p){
+  const pl=s.players[p]; if(!pl||!pl.alive){ s.reinf=0; return; }
+  runUpkeep(s,p);
+  s.reinf = pl.alive ? reinforcements(s,p) : 0;
+}
+function runUpkeep(s,p){
+  const pl=s.players[p]; if(!pl||!pl.alive) return;
+  const farms=countBuild(s,p,'farm'), mills=countBuild(s,p,'mill'), refs=countBuild(s,p,'refinery');
+  const roll=d6(s);
+  const cropGain=farms>0?farms*C.CROP_MULT*roll:0;
+  const steelGain=mills*C.STEEL_PER_MILL;
+  const gasGain=refs*C.GAS_PER_REFINERY;
+  pl.crops+=cropGain; pl.steel+=steelGain; pl.gas+=gasGain;
+  const tax=ownedLands(s,p).length*C.BASE_TAX_PER_TERR; pl.coin+=tax;
+  const troops=totalTroops(s,p); const need=troops*C.FEED_PER_TROOP; let starved=0;
+  if(pl.crops>=need){ pl.crops-=need; }
+  else { const fed=pl.crops; pl.crops=0; const unfed=troops-fed; for(let k=0;k<unfed;k++){ if(chance(s,C.STARVE_CHANCE)) starved++; } if(starved>0) removeTroops(s,p,starved); }
+  pl._upkeep={roll,cropGain,steelGain,gasGain,tax,need,starved,farms,mills,refs};
+  if(!ownedLands(s,p).length) pl.alive=false;
+  return pl._upkeep;
+}
+function removeTroops(s,p,count){
+  let left=count;
+  while(left>0){ let best=-1,bt=0; for(let i=0;i<s.N;i++){ if(s.owner[i]===p && s.troops[i]>bt){ bt=s.troops[i]; best=i; } } if(best<0||bt<=0)break; s.troops[best]--; left--; }
+}
+
+function setBuilding(s,p,i,type){
+  if(s.owner[i]!==p||s.water[i]) return {ok:false,msg:'Not your land'};
+  if(s.build[i]===type) return {ok:false,msg:'Already set'};
+  const pl=s.players[p]; if(pl.coin<C.BUILD_COST_COIN) return {ok:false,msg:'Need '+C.BUILD_COST_COIN+' coin'};
+  pl.coin-=C.BUILD_COST_COIN; s.build[i]=type; return {ok:true};
+}
+function buildShip(s,p){
+  const pl=s.players[p];
+  if(!hasCoastalLand(s,p)) return {ok:false,msg:'Need coastal land'};
+  if(pl.steel<C.SHIP_STEEL) return {ok:false,msg:'Need '+C.SHIP_STEEL+' steel'};
+  pl.steel-=C.SHIP_STEEL; pl.ships++; return {ok:true};
+}
+function buildAsset(s,p,i,kind){
+  if(s.owner[i]!==p||s.water[i]) return {ok:false,msg:'Not your land'};
+  const pl=s.players[p]; const cost=kind==='launcher'?C.LAUNCHER_STEEL:C.INTERCEPTOR_STEEL;
+  if(pl.steel<cost) return {ok:false,msg:'Need '+cost+' steel'};
+  if(kind==='launcher'&&s.launcher[i]) return {ok:false,msg:'Has launcher'};
+  if(kind==='interceptor'&&s.interceptor[i]) return {ok:false,msg:'Has interceptor'};
+  pl.steel-=cost; if(kind==='launcher')s.launcher[i]=true; else s.interceptor[i]=true; return {ok:true};
+}
+function manufacture(s,p,kind){
+  const pl=s.players[p]; const have=kind==='nuke'?pl.nukes:pl.rockets; const first=have===0;
+  const cost=kind==='nuke'?(first?C.NUKE_FIRST_STEEL:C.NUKE_NEXT_STEEL):(first?C.ROCKET_FIRST_STEEL:C.ROCKET_NEXT_STEEL);
+  if(pl.steel<cost) return {ok:false,msg:'Need '+cost+' steel'};
+  pl.steel-=cost;
+  const prob=first?(kind==='nuke'?C.NUKE_FIRST_PROB:C.ROCKET_FIRST_PROB):1;
+  const success=chance(s,prob);
+  if(success){ if(kind==='nuke')pl.nukes++; else pl.rockets++; }
+  return {ok:true,success,first,cost};
+}
+function sell(s,p,commodity,units){
+  const pl=s.players[p]; units=Math.min(units,pl[commodity]);
+  if(units<=0) return {ok:false,msg:'Nothing to sell'};
+  const coin=Math.floor(units*C.SELL[commodity]); pl[commodity]-=units; pl.coin+=coin;
+  return {ok:true,coin,units};
+}
+function hire(s,p,i){
+  const pl=s.players[p]; if(s.owner[i]!==p) return {ok:false,msg:'Not your land'};
+  if(pl.coin<C.HIRE_COIN) return {ok:false,msg:'Need '+C.HIRE_COIN+' coin'};
+  pl.coin-=C.HIRE_COIN; s.troops[i]+=C.HIRE_TROOPS; return {ok:true};
+}
+function placeReinf(s,p,i,n){
+  if(s.owner[i]!==p) return {ok:false,msg:'Not your land'};
+  n=Math.min(n,s.reinf); if(n<1) return {ok:false,msg:'No reinforcements'};
+  s.troops[i]+=n; s.reinf-=n; return {ok:true};
+}
+
+function resolveCombat(s, atkTroops, defTroops){
+  let a=[],d=[];
+  for(let i=0;i<Math.min(3,atkTroops);i++)a.push(d6(s));
+  for(let i=0;i<Math.min(2,defTroops);i++)d.push(d6(s));
+  a.sort((x,y)=>y-x); d.sort((x,y)=>y-x);
+  let atkLoss=0,defLoss=0; const pairs=Math.min(a.length,d.length);
+  for(let i=0;i<pairs;i++){ if(a[i]>d[i])defLoss++; else atkLoss++; }
+  return {atkLoss,defLoss,a,d};
+}
+function landAttack(s,p,from,to,commit,blitz){
+  if(s.owner[from]!==p) return {ok:false,msg:'Not your land'};
+  if(!landNeighbors(s,from).includes(to)) return {ok:false,msg:'Not adjacent by land'};
+  if(s.crater[to]) return {ok:false,msg:'Scorched ground'};
+  if(s.troops[from]<2) return {ok:false,msg:'Need 2+ troops'};
+  const pl=s.players[p]; commit=Math.min(commit,s.troops[from]-1);
+  const gasCost=commit*C.MARCH_GAS_PER_TROOP;
+  if(pl.gas<gasCost) return {ok:false,msg:'Need '+gasCost+' gas'};
+  pl.gas-=gasCost; return _attack(s,p,from,to,commit,blitz,false);
+}
+function navalAttack(s,p,from,to,commit,blitz){
+  if(s.owner[from]!==p||!s.coast[from]) return {ok:false,msg:'Origin not coastal'};
+  if(!s.seaAdj[from].includes(to)) return {ok:false,msg:'No sea route'};
+  if(s.crater[to]) return {ok:false,msg:'Scorched ground'};
+  const pl=s.players[p];
+  const avail=pl.ships-s.shipsUsed;
+  if(avail<1) return {ok:false,msg:'No ship available'};
+  commit=Math.min(commit,s.troops[from]-1,C.SHIP_CAP*avail);
+  if(commit<1) return {ok:false,msg:'Need troops to embark'};
+  const shipsNeeded=Math.ceil(commit/C.SHIP_CAP);
+  const gasCost=shipsNeeded*C.SHIP_MOVE_GAS;
+  if(pl.gas<gasCost) return {ok:false,msg:'Need '+gasCost+' gas'};
+  pl.gas-=gasCost; s.shipsUsed+=shipsNeeded; return _attack(s,p,from,to,commit,blitz,true);
+}
+function _attack(s,p,from,to,commit,blitz,naval){
+  let atk=commit, log=[]; const defOwner=s.owner[to]; let def=s.troops[to];
+  do{ const r=resolveCombat(s,atk,def); atk-=r.atkLoss; def-=r.defLoss; log.push(r); if(atk<=0||def<=0)break; } while(blitz);
+  let captured=false;
+  if(def<=0){
+    captured=true; s.troops[to]=atk; s.owner[to]=p;
+    s.troops[from]-=commit; if(s.troops[from]<0)s.troops[from]=0;
+    if(defOwner>=0 && ownedLands(s,defOwner).length===0) s.players[defOwner].alive=false;
+  } else {
+    s.troops[from]-=(commit-atk); s.troops[to]=def; if(s.troops[from]<1)s.troops[from]=1;
+  }
+  checkWinner(s);
+  return {ok:true,captured,log,naval:!!naval,atkRemain:Math.max(0,atk),defRemain:Math.max(0,def)};
+}
+
+function fortify(s,p,from,to,n){
+  if(s.fortifyUsed) return {ok:false,msg:'Already fortified this turn'};
+  if(s.owner[from]!==p||s.owner[to]!==p) return {ok:false,msg:'Both must be yours'};
+  const landConn=landNeighbors(s,from).includes(to);
+  const seaConn=s.coast[from]&&s.coast[to]&&s.seaAdj[from].includes(to);
+  if(!landConn&&!seaConn) return {ok:false,msg:'Not connected'};
+  n=Math.min(n,s.troops[from]-1); if(n<1) return {ok:false,msg:'Nothing to move'};
+  const pl=s.players[p]; const bySea=!landConn;
+  const shipsNeeded=bySea?Math.ceil(n/C.SHIP_CAP):0;
+  const gasCost=bySea?shipsNeeded*C.SHIP_MOVE_GAS:n*C.MARCH_GAS_PER_TROOP;
+  if(bySea && (pl.ships-s.shipsUsed)<shipsNeeded) return {ok:false,msg:'Not enough ships'};
+  if(pl.gas<gasCost) return {ok:false,msg:'Need '+gasCost+' gas'};
+  pl.gas-=gasCost; if(bySea)s.shipsUsed+=shipsNeeded; s.troops[from]-=n; s.troops[to]+=n; s.fortifyUsed=true;
+  return {ok:true,bySea};
+}
+
+function hasInterceptor(s,p){ return ownedLands(s,p).some(i=>s.interceptor[i]); }
+function maxDefenseRockets(s,defId){
+  if(defId<0) return 0;
+  const d=s.players[defId];
+  if(!hasInterceptor(s,defId) || d.gas<C.ROCKET_FIRE_GAS) return 0;
+  return d.rockets;
+}
+function defenderAutoRockets(s,defId){ // AI / automatic defense policy
+  const m=maxDefenseRockets(s,defId); if(m<=0) return 0;
+  return Math.min(m, 2); // two rockets => ~89% intercept, without emptying the stockpile
+}
+// rocketCount: how many rockets the DEFENDER commits, declared up front (caller decides)
+function fireNuke(s,p,launcherTerr,target,rocketCount){
+  const pl=s.players[p];
+  if(pl.nukes<1) return {ok:false,msg:'No nuke'};
+  if(s.owner[launcherTerr]!==p||!s.launcher[launcherTerr]) return {ok:false,msg:'No launcher'};
+  if(pl.gas<C.NUKE_FIRE_GAS) return {ok:false,msg:'Need '+C.NUKE_FIRE_GAS+' gas'};
+  if(s.water[target]||s.crater[target]) return {ok:false,msg:'Invalid target'};
+  if(s.owner[target]===p) return {ok:false,msg:'Cannot nuke your own land'};
+  pl.nukes--; pl.gas-=C.NUKE_FIRE_GAS;
+  const victim=s.owner[target];
+  // defender fires a simultaneous salvo of rockets
+  let fired=0, intercepted=false, intercepts=0;
+  const cap=maxDefenseRockets(s,victim);
+  rocketCount=Math.max(0,Math.min(rocketCount|0, cap));
+  if(rocketCount>0){
+    const d=s.players[victim];
+    d.gas-=C.ROCKET_FIRE_GAS; d.rockets-=rocketCount; fired=rocketCount;
+    for(let k=0;k<rocketCount;k++){ if(chance(s,C.INTERCEPT_PROB)){ intercepted=true; intercepts++; } }
+  }
+  if(intercepted) return {ok:true,outcome:'intercepted',fired,intercepts,target,victim};
+  // not intercepted. If salvo was fired, the un-intercepted nuke detonates. If none fired, 2/3 reliability.
+  let detonates = (fired>0) ? true : chance(s,C.NUKE_HIT_PROB);
+  if(!detonates) return {ok:true,outcome:'dud',fired,target,victim};
+  // detonation: permanent crater
+  s.troops[target]=0; s.build[target]=''; s.launcher[target]=false; s.interceptor[target]=false;
+  s.owner[target]=-1; s.crater[target]=true; s.detonations++;
+  if(victim>=0 && ownedLands(s,victim).length===0) s.players[victim].alive=false;
+  if(s.detonations>C.WINTER_LIMIT){ s.ended='nuclear_winter'; s.winner=null; return {ok:true,outcome:'nuclear_winter',fired,target,victim,detonations:s.detonations}; }
+  checkWinner(s);
+  return {ok:true,outcome:'detonated',fired,target,victim,detonations:s.detonations};
+}
+
+function concede(s,p){
+  const pl=s.players[p]; if(!pl||!pl.alive) return {ok:false,msg:'Not in play'};
+  if(pl.isAI) return {ok:false,msg:'AI cannot concede'};
+  for(let i=0;i<s.N;i++){ if(s.owner[i]===p){ s.owner[i]=-1; s.build[i]=''; s.launcher[i]=false; s.interceptor[i]=false; } }
+  pl.alive=false;
+  checkWinner(s);
+  return {ok:true};
+}
+
+function endPhase(s){
+  if(s.phase==='build') s.phase='march';
+  else if(s.phase==='march') s.phase='maneuver';
+  else endTurn(s);
+}
+function endTurn(s){
+  let n=s.turn, wrapped=false;
+  for(let k=0;k<s.players.length;k++){ n=(n+1)%s.players.length; if(n===0)wrapped=true; if(s.players[n].alive) break; }
+  if(wrapped) s.round++;
+  s.turn=n; s.phase='build'; s.fortifyUsed=false; s.shipsUsed=0;
+  beginTurn(s,s.turn); checkWinner(s);
+}
+function occupiableCount(s){ let n=0; for(let i=0;i<s.N;i++) if(!s.water[i]&&!s.crater[i]) n++; return n; }
+function checkWinner(s){
+  if(s.ended==='nuclear_winter'){ s.winner=null; return; }
+  const alive=s.players.filter(pl=>pl.alive);
+  if(alive.length<=1){ s.winner=alive.length?alive[0].id:null; if(s.winner!==null) s.winBy='conquest'; return; }
+}
+function E_ownedCount(s,p){ let n=0; for(let i=0;i<s.N;i++) if(s.owner[i]===p&&!s.water[i]&&!s.crater[i]) n++; return n; }
+
+root.FiefEngine={ C, newGame, beginTurn, runUpkeep, ownedLands, countBuild, totalTroops, hasCoastalLand,
+  landNeighbors, reinforcements, setBuilding, buildShip, buildAsset, manufacture, sell, hire, placeReinf,
+  resolveCombat, landAttack, navalAttack, fortify, fireNuke, hasInterceptor, maxDefenseRockets, defenderAutoRockets, occupiableCount, concede, endPhase, endTurn, checkWinner, dist };
+
+})(typeof module!=='undefined'?module.exports:(this.window=this.window||this));
+</script>
+<script>// ===== Fiefdom II AI =====
+(function(root){
+'use strict';
+const E = (typeof module!=='undefined') ? require('./engine').FiefEngine : root.FiefEngine;
+const C = E.C;
+
+const DIFF = {
+  squire:  { atk:1.7, weapons:false, ships:true,  hireCoin:14, maxAtk:8 },
+  knight:  { atk:1.35, weapons:'rare', ships:true, hireCoin:10, maxAtk:12 },
+  warlord: { atk:1.12, weapons:'yes',  ships:true, hireCoin:8,  maxAtk:16 }
+};
+
+function frontLine(s,p,i){ // does land i border an enemy/neutral (land or sea)?
+  for(const j of E.landNeighbors(s,i)) if(s.owner[j]!==p) return true;
+  if(s.coast[i]) for(const j of s.seaAdj[i]) if(s.owner[j]!==p) return true;
+  return false;
+}
+function enemyAdjCount(s,p,i){
+  let c=0; for(const j of E.landNeighbors(s,i)) if(s.owner[j]!==p) c++;
+  if(s.coast[i]) for(const j of s.seaAdj[i]) if(s.owner[j]!==p) c++;
+  return c;
+}
+
+function buildTurn(s,p){
+  const cfg=DIFF[s.players[p].ai]||DIFF.knight; const pl=s.players[p];
+  let lands=E.ownedLands(s,p);
+  // --- economy: assign buildings to empty slots ---
+  const troops=E.totalTroops(s,p);
+  let guard=0;
+  while(guard++<40){
+    const farms=E.countBuild(s,p,'farm'), mills=E.countBuild(s,p,'mill'), refs=E.countBuild(s,p,'refinery');
+    const empties=lands.filter(i=>s.build[i]==='');
+    if(!empties.length || pl.coin<C.BUILD_COST_COIN) break;
+    // decide type: ensure feeding first (avg crop/farm ~ 4*3.5=14), then gas, then steel
+    const cropCap=farms*C.CROP_MULT*3.5;
+    let type;
+    if(cropCap < troops+8) type='farm';
+    else if(refs<2 || pl.gas<20) type='refinery';
+    else if(mills < Math.max(1,Math.floor(lands.length/6))) type='mill';
+    else type = (farms<=refs)?'farm':'refinery';
+    // build on an interior slot if possible (keep frontline for troops)
+    empties.sort((a,b)=>frontLine(s,p,a)-frontLine(s,p,b));
+    E.setBuilding(s,p,empties[0],type);
+  }
+  // --- sell surplus for coin if coin low ---
+  if(pl.coin<cfg.hireCoin){
+    if(pl.crops>troops+40) E.sell(s,p,'crops', pl.crops-(troops+30));
+    if(pl.steel>30) E.sell(s,p,'steel', pl.steel-24);
+  }
+  // --- build ships if coastal and there is a sea frontier to reach ---
+  if(cfg.ships && E.hasCoastalLand(s,p)){
+    // strongest enemy stack reachable only across water
+    let seaThreat=0;
+    for(const i of lands){ if(s.coast[i]) for(const j of s.seaAdj[i]) if(s.owner[j]!==p) seaThreat=Math.max(seaThreat,s.troops[j]); }
+    const wantShips = seaThreat>0 ? Math.min(6, Math.ceil((seaThreat*1.4)/C.SHIP_CAP)+1) : 0;
+    let shipGuard=0;
+    while(pl.ships<wantShips && pl.steel>=C.SHIP_STEEL && shipGuard++<6){ if(!E.buildShip(s,p).ok) break; }
+  }
+  // --- weapons (mid/late game) ---
+  if(cfg.weapons && s.round>=5){
+    const doNuke = cfg.weapons==='yes' ? (s.round>=5) : (s.round>=8);
+    if(doNuke){
+      // ensure a launcher on an interior land
+      const hasLauncher=lands.some(i=>s.launcher[i]);
+      if(!hasLauncher && pl.steel>=C.LAUNCHER_STEEL){
+        const interior=lands.slice().sort((a,b)=>frontLine(s,p,a)-frontLine(s,p,b))[0];
+        if(interior!==undefined) E.buildAsset(s,p,interior,'launcher');
+      }
+      if(pl.nukes<1 && pl.steel>=C.NUKE_FIRST_STEEL) E.manufacture(s,p,'nuke');
+      else if(pl.nukes<2 && pl.steel>=C.NUKE_NEXT_STEEL+20) E.manufacture(s,p,'nuke');
+    }
+  }
+  // --- hire troops with leftover coin ---
+  let hireGuard=0;
+  while(pl.coin>=cfg.hireCoin && hireGuard++<8){
+    const front=lands.filter(i=>frontLine(s,p,i)).sort((a,b)=>enemyAdjCount(s,p,b)-enemyAdjCount(s,p,a));
+    const tgt=front[0]!==undefined?front[0]:lands[0];
+    if(tgt===undefined) break;
+    if(!E.hire(s,p,tgt).ok) break;
+  }
+  // --- place free reinforcements on the hottest front ---
+  let rGuard=0;
+  while(s.reinf>0 && rGuard++<60){
+    lands=E.ownedLands(s,p);
+    const front=lands.filter(i=>frontLine(s,p,i)).sort((a,b)=>enemyAdjCount(s,p,b)-enemyAdjCount(s,p,a));
+    const tgt=front[0]!==undefined?front[0]:lands[0];
+    if(tgt===undefined) break;
+    if(!E.placeReinf(s,p,tgt,1).ok) break;
+  }
+}
+
+function bestAttack(s,p,cfg){
+  let best=null;
+  const lands=E.ownedLands(s,p);
+  // endgame closer: if we hold a big majority, attack whenever we merely outnumber
+  let totalLand=0; for(let i=0;i<s.N;i++) if(!s.water[i]) totalLand++;
+  const share=lands.length/Math.max(1,totalLand);
+  const thr = share>0.5 ? 1.0 : cfg.atk;
+  const pl=s.players[p];
+  const avail=pl.ships-s.shipsUsed;
+  for(const from of lands){
+    if(s.troops[from]<2) continue;
+    for(const to of E.landNeighbors(s,from)){
+      if(s.owner[to]===p||s.crater[to]) continue;
+      const ratio=(s.troops[from]-1)/Math.max(1,s.troops[to]);
+      if(ratio>=thr){ const score=ratio + (s.owner[to]<0?0.3:0.0); if(!best||score>best.score) best={from,to,naval:false,score}; }
+    }
+    if(s.coast[from] && avail>0 && pl.gas>=C.SHIP_MOVE_GAS){
+      const cap=Math.min(s.troops[from]-1, C.SHIP_CAP*avail);
+      for(const to of s.seaAdj[from]){
+        if(s.owner[to]===p||s.crater[to]) continue;
+        const ratio=cap/Math.max(1,s.troops[to]);
+        if(cap>=1 && ratio>=thr){ const score=ratio-0.12 + (s.owner[to]<0?0.3:0); if(!best||score>best.score) best={from,to,naval:true,commit:cap,score}; }
+      }
+    }
+  }
+  return best;
+}
+
+function marchTurn(s,p){
+  const cfg=DIFF[s.players[p].ai]||DIFF.knight; const pl=s.players[p];
+  let guard=0;
+  while(guard++<cfg.maxAtk){
+    if(pl.gas<1) break;
+    const mv=bestAttack(s,p,cfg);
+    if(!mv) break;
+    let res;
+    if(mv.naval){ const commit=mv.commit||Math.min(s.troops[mv.from]-1,C.SHIP_CAP); res=E.navalAttack(s,p,mv.from,mv.to,commit,true); }
+    else { const commit=s.troops[mv.from]-1; res=E.landAttack(s,p,mv.from,mv.to,commit,true); }
+    if(!res.ok) break;
+    if(s.winner!==null) return;
+  }
+  // opportunistic nuke: warlord, if has nuke+launcher+gas, hit strongest enemy stack
+  if(pl.nukes>0 && pl.gas>=C.NUKE_FIRE_GAS && s.detonations<=C.WINTER_LIMIT){
+    const lnc=E.ownedLands(s,p).find(i=>s.launcher[i]);
+    if(lnc!==undefined){
+      let tgt=-1,tb=6;
+      for(let i=0;i<s.N;i++){ if(!s.water[i]&&!s.crater[i]&&s.owner[i]>=0&&s.owner[i]!==p&&s.troops[i]>tb){ tb=s.troops[i]; tgt=i; } }
+      if(tgt>=0){ const rk=E.defenderAutoRockets(s, s.owner[tgt]); E.fireNuke(s,p,lnc,tgt,rk); }
+    }
+  }
+}
+
+function maneuverTurn(s,p){
+  if(s.fortifyUsed) return;
+  const lands=E.ownedLands(s,p);
+  // move from safest interior stack to hottest front, by land
+  let src=-1,srcT=1;
+  for(const i of lands){ if(!frontLine(s,p,i) && s.troops[i]>srcT){ // interior with troops
+      // needs a land neighbor that is ours and frontline
+      const dst=E.landNeighbors(s,i).filter(j=>s.owner[j]===p);
+      if(dst.length){ srcT=s.troops[i]; src=i; }
+  } }
+  if(src<0) return;
+  const dsts=E.landNeighbors(s,src).filter(j=>s.owner[j]===p).sort((a,b)=>enemyAdjCount(s,p,b)-enemyAdjCount(s,p,a));
+  if(!dsts.length) return;
+  const n=s.troops[src]-1;
+  if(n>0 && s.players[p].gas>=n) E.fortify(s,p,src,dsts[0],n);
+}
+
+function takeTurn(s){
+  const p=s.turn; if(!s.players[p].alive){ E.endTurn(s); return; }
+  buildTurn(s,p); E.endPhase(s);      // -> march
+  marchTurn(s,p);  E.endPhase(s);     // -> maneuver
+  if(s.winner!==null) return;
+  maneuverTurn(s,p); E.endPhase(s);   // -> endTurn (next player, upkeep)
+}
+
+root.FiefAI={ buildTurn, marchTurn, maneuverTurn, takeTurn, DIFF };
+})(typeof module!=='undefined'?module.exports:(this.window=this.window||this));
+</script>
+<script>
+/* ================= UI ================= */
+var E=window.FiefEngine, AI=window.FiefAI, C=E.C;
+var S=null, world=null, cfg={h:1,a:2,d:'knight'};
+var sel=-1, atkFrom=-1, nukeFrom=-1, uimode='';
+var SAVE='fiefdom2_save';
+
+/* setup controls */
+function adjP(which,delta){
+  if(which==='h'){ cfg.h=Math.max(1,Math.min(6,cfg.h+delta)); if(cfg.h+cfg.a>6)cfg.a=6-cfg.h; if(cfg.h+cfg.a<2)cfg.a=2-cfg.h; }
+  else { cfg.a=Math.max(0,Math.min(5,cfg.a+delta)); if(cfg.h+cfg.a>6)cfg.h=6-cfg.a; if(cfg.h+cfg.a<2)cfg.h=Math.max(1,2-cfg.a); }
+  document.getElementById('hVal').innerHTML=cfg.h+'<small>at this device</small>';
+  document.getElementById('aVal').innerHTML=cfg.a+'<small id="totLbl">'+(cfg.h+cfg.a)+' houses total</small>';
+  document.getElementById('hLbl').textContent=cfg.h;
+  document.getElementById('aLbl').textContent=cfg.a;
+}
+document.getElementById('diffOpts').addEventListener('click',function(e){
+  var b=e.target.closest('.opt'); if(!b)return;
+  [].forEach.call(this.children,function(c){c.classList.remove('on');});
+  b.classList.add('on'); cfg.d=b.dataset.d;
+});
+
+function mapTarget(total){ return total<=2?50: total===3?56: total===4?66: total===5?76:88; }
+
+function startGame(){
+  var total=cfg.h+cfg.a;
+  var seed=(Date.now()^(Math.random()*1e9))>>>0;
+  world=generateWorld(seed, mapTarget(total));
+  S=E.newGame(world, cfg.h, cfg.a, cfg.d);
+  LOG=[];
+  enterGame();
+  save();
+  routeTurn(true);
+}
+function resumeGame(){
+  try{
+    var raw=localStorage.getItem(SAVE); if(!raw)return;
+    var data=JSON.parse(raw);
+    if(data && data.v===2){ S=data.s; LOG=data.log||[]; } else { S=data; LOG=[]; }
+    world=S;
+    cfg.h=S.players.filter(function(p){return !p.isAI;}).length;
+    enterGame(); routeTurn(true);
+  }catch(e){ toast('Could not resume'); }
+}
+function enterGame(){
+  document.getElementById('setup').style.display='none';
+  document.getElementById('game').classList.add('on');
+}
+
+function save(){ try{ localStorage.setItem(SAVE, JSON.stringify({v:2, s:S, log:LOG})); }catch(e){} }
+function hasSave(){ try{ return !!localStorage.getItem(SAVE); }catch(e){ return false; } }
+
+/* ---- turn routing (hotseat + AI) ---- */
+function isHuman(p){ return !S.players[p].isAI; }
+function routeTurn(initial){
+  if(S.ended==='nuclear_winter'){ showNuclearWinter(); return; }
+  if(S.winner!==null){ showVictory(); return; }
+  var p=S.turn;
+  if(!S.players[p].alive){ E.endTurn(S); routeTurn(); return; }
+  if(S.players[p].isAI){ render(); runAITurn(); return; }
+  // human: show pass screen if multiple humans (or coming off AI), else go straight in
+  var multiHuman=S.players.filter(function(x){return !x.isAI;}).length>1;
+  if(multiHuman && !initial){ showPass(p); }
+  else { beginHumanTurn(); }
+}
+function beginHumanTurn(){
+  document.getElementById('pass').classList.remove('on');
+  sel=-1; atkFrom=-1; nukeFrom=-1; uimode='';
+  render();
+  if(S.phase==='build'){
+    var u=S.players[S.turn]._upkeep;
+    if(u){ var m=[]; if(u.cropGain)m.push('+'+u.cropGain+' crops'); if(u.starved)m.push(u.starved+' starved'); toast('Court of '+S.players[S.turn].name+(m.length?': '+m.join(', '):'')); }
+  }
+}
+function showPass(p){
+  var pl=S.players[p];
+  document.getElementById('passDot').style.background=pl.color;
+  document.getElementById('passDot').style.color=pl.color;
+  document.getElementById('passName').textContent=pl.name;
+  document.getElementById('passSub').textContent='Pass the device to '+pl.name+'. Then take your turn.';
+  document.getElementById('pass').classList.add('on');
+}
+
+function runAITurn(){
+  var p=S.turn, pl=S.players[p];
+  document.getElementById('hint').innerHTML='<b>'+pl.name+'</b> is scheming...';
+  var before=S.owner.slice(); var detBefore=S.detonations;
+  setTimeout(function(){
+    AI.takeTurn(S);
+    var gained=0;
+    for(var i=0;i<S.N;i++){ if(before[i]!==p && S.owner[i]===p) gained++; }
+    var msgs=[];
+    if(gained)msgs.push('took '+gained+' land'+(gained>1?'s':''));
+    if(S.detonations>detBefore){ var nn=S.detonations-detBefore; msgs.push('launched '+nn+' nuke'+(nn>1?'s':'')); }
+    pushLog(pl.name+(msgs.length?' '+msgs.join(', '):' held position')+'.', gained>0||S.detonations>detBefore);
+    render(); save();
+    if(S.ended==='nuclear_winter'){ showNuclearWinter(); return; }
+    if(S.winner!==null){ showVictory(); return; }
+    routeTurn();
+  }, 620);
+}
+
+/* ---- rendering ---- */
+function ownerFill(o){
+  if(o<0) return '#4b5568';
+  return S.players[o].color;
+}
+function craterGlyph(c){
+  var cy=c.y+6;
+  var g='<circle class="asset" cx="'+c.x+'" cy="'+cy+'" r="13" fill="#1a1414" stroke="#3a2a22" stroke-width="1.5"/>';
+  g+='<circle class="asset" cx="'+c.x+'" cy="'+cy+'" r="3" fill="#c9a24a"/>';
+  for(var k=0;k<3;k++){ var ang=(k*120-90)*Math.PI/180; var x1=c.x+Math.cos(ang)*5, y1=cy+Math.sin(ang)*5, x2=c.x+Math.cos(ang)*11, y2=cy+Math.sin(ang)*11; g+='<line class="asset" x1="'+x1.toFixed(1)+'" y1="'+y1.toFixed(1)+'" x2="'+x2.toFixed(1)+'" y2="'+y2.toFixed(1)+'" stroke="#c9a24a" stroke-width="3"/>'; }
+  return g;
+}
+function render(){
+  if(!S)return;
+  var p=S.turn, pl=S.players[p];
+  document.getElementById('turnDot').style.color=pl.color;
+  document.getElementById('turnDot').style.background=pl.color;
+  document.getElementById('turnName').innerHTML=pl.name+' <em>Round '+S.round+'</em>';
+  var pn={build:'Court',march:'March',maneuver:'Maneuver'}[S.phase];
+  document.getElementById('phasePill').textContent=pn;
+  renderHUD(); renderMap(); renderPhaseBar();
+}
+function renderHUD(){
+  var pl=S.players[S.turn];
+  function r(color,val,label){ return '<div class="res"><span class="ri" style="background:'+color+'"></span><span class="rv">'+val+'</span><span class="rl">'+label+'</span></div>'; }
+  var h='';
+  if(S.detonations>0) h+='<div class="res" style="border-color:var(--ember)"><span class="ri" style="background:var(--ember)"></span><span class="rv">'+S.detonations+'/'+C.WINTER_LIMIT+'</span><span class="rl">fallout</span></div>';
+  if(S.phase==='build' && S.reinf>0) h+=r('var(--parch)', S.reinf, 'muster');
+  h+=r('#e8b45f', pl.coin, 'coin');
+  h+=r('var(--crop)', Math.round(pl.crops), 'crops');
+  h+=r('var(--steel)', Math.round(pl.steel), 'steel');
+  h+=r('var(--gas)', Math.round(pl.gas), 'gas');
+  h+=r('#7fbfe0', pl.ships-(S.shipsUsed||0), 'ships');
+  if(pl.nukes)h+=r('var(--ember)', pl.nukes, 'nukes');
+  if(pl.rockets)h+=r('#6ec0ff', pl.rockets, 'rockets');
+  document.getElementById('hud').innerHTML=h;
+}
+function renderMap(){
+  var svg='', p=S.turn;
+  // pass 1: fills
+  for(var i=0;i<S.N;i++){
+    var poly=S.cells[i]; if(poly.length<3)continue;
+    var d='M'+poly.map(function(pt){return pt.x+' '+pt.y;}).join('L')+'Z';
+    var cls='cell', fill;
+    if(S.crater[i]){ cls+=' crater'; fill='#241c1c'; }
+    else if(S.water[i]){ cls+=' water'; fill='url(#ocean)'; }
+    else { fill=ownerFill(S.owner[i]); cls+=' pick'; }
+    if(i===sel||i===atkFrom||i===nukeFrom) cls+=' sel';
+    else if(isTarget(i)) cls+=' tgt';
+    var op = S.crater[i]?1:(S.water[i]?1:(S.owner[i]<0?0.5:0.82));
+    svg+='<path class="'+cls+'" d="'+d+'" fill="'+fill+'" fill-opacity="'+op+'" data-i="'+i+'"/>';
+  }
+  // pass 2: labels/assets on land
+  for(var i=0;i<S.N;i++){
+    if(S.water[i])continue;
+    var c=S.centroid[i];
+    if(S.crater[i]){ svg+=craterGlyph(c); continue; }
+    // building glyph
+    if(S.build[i]){
+      var g={farm:'C',mill:'S',refinery:'G'}[S.build[i]];
+      var col={farm:'var(--crop)',mill:'var(--steel)',refinery:'var(--gas)'}[S.build[i]];
+      svg+='<circle class="asset" cx="'+(c.x-14)+'" cy="'+(c.y-15)+'" r="8" fill="#0d131d" stroke="'+col+'" stroke-width="1.6"/>';
+      svg+='<text class="bglyph" x="'+(c.x-14)+'" y="'+(c.y-11.5)+'" font-size="10" fill="'+col+'">'+g+'</text>';
+    }
+    if(S.launcher[i]) svg+='<path class="asset" d="M'+(c.x+12)+' '+(c.y-20)+'l6 10h-12z" fill="var(--ember)" stroke="#0d131d" stroke-width="1"/>';
+    if(S.interceptor[i]) svg+='<path class="asset" d="M'+(c.x+12)+' '+(c.y-9)+'l6 4-6 4-6-4z" fill="#6ec0ff" stroke="#0d131d" stroke-width="1"/>';
+    // troop pill
+    var t=S.troops[i];
+    var ring=ownerFill(S.owner[i]);
+    svg+='<rect class="cnt-pill" x="'+(c.x-14)+'" y="'+(c.y-1)+'" rx="9" width="28" height="19" stroke="'+ring+'"/>';
+    svg+='<text class="cnt-txt" x="'+c.x+'" y="'+(c.y+12.5)+'" font-size="12.5">'+t+'</text>';
+  }
+  var defs='<defs><radialGradient id="ocean" cx="50%" cy="45%" r="75%"><stop offset="0%" stop-color="#1d3a54"/><stop offset="100%" stop-color="#0f2032"/></radialGradient></defs><rect width="1000" height="680" fill="#0f2032"/>';
+  document.getElementById('map').innerHTML=defs+svg;
+}
+document.getElementById('map').addEventListener('click',function(e){
+  var t=e.target.closest('[data-i]'); if(!t)return;
+  onTapCell(parseInt(t.dataset.i,10));
+});
+
+function isTarget(i){
+  var p=S.turn;
+  if(S.phase==='march'){
+    if(atkFrom>=0){
+      if(E.landNeighbors(S,atkFrom).indexOf(i)>=0 && S.owner[i]!==p && !S.crater[i]) return true;
+      if(S.coast[atkFrom] && S.seaAdj[atkFrom].indexOf(i)>=0 && S.owner[i]!==p && !S.crater[i] && (S.players[p].ships-S.shipsUsed)>0) return true;
+    }
+    if(uimode==='nuke' && nukeFrom>=0 && !S.water[i] && !S.crater[i] && S.owner[i]!==p) return true;
+  }
+  if(S.phase==='maneuver' && atkFrom>=0){
+    if(E.landNeighbors(S,atkFrom).indexOf(i)>=0 && S.owner[i]===p) return true;
+    if(S.coast[atkFrom] && S.seaAdj[atkFrom].indexOf(i)>=0 && S.owner[i]===p && (S.players[p].ships-S.shipsUsed)>0) return true;
+  }
+  return false;
+}
+
+function onTapCell(i){
+  var p=S.turn;
+  if(S.water[i]){ return; }
+  if(S.crater[i]){ toast('Scorched ground. Nothing can hold it.'); return; }
+  if(S.phase==='build'){
+    if(S.owner[i]===p){ sel=i; openLandSheet(i); render(); }
+    else { toast(S.owner[i]<0?'Neutral land':S.players[S.owner[i]].name+"'s land"); }
+    return;
+  }
+  if(S.phase==='march'){
+    if(uimode==='nuke'){
+      if(nukeFrom>=0 && isTarget(i)){ confirmNuke(nukeFrom,i); }
+      return;
+    }
+    if(S.owner[i]===p && S.troops[i]>=2){ atkFrom=i; render(); toast('Attacking from '+here(i)+'. Tap a target.'); return; }
+    if(atkFrom>=0 && isTarget(i)){ openAttack(atkFrom,i); return; }
+    if(S.owner[i]===p){ toast('Needs 2+ troops to attack'); }
+    return;
+  }
+  if(S.phase==='maneuver'){
+    if(S.owner[i]===p && atkFrom<0 && S.troops[i]>=2){ atkFrom=i; render(); toast('Move from '+here(i)+'. Tap a connected land.'); return; }
+    if(atkFrom>=0 && isTarget(i)){ openFortify(atkFrom,i); return; }
+    if(S.owner[i]===p && atkFrom<0){ toast('Needs 2+ troops to move'); }
+    return;
+  }
+}
+function here(i){ return 'a '+ (S.build[i]||'holding'); }
+
+/* ---- phase bar ---- */
+function renderPhaseBar(){
+  var p=S.turn, pl=S.players[p], bar=document.getElementById('phaseBtns'), hint=document.getElementById('hint');
+  var h='';
+  if(S.phase==='build'){
+    hint.innerHTML=S.reinf>0?('Place your <b>'+S.reinf+'</b> muster, set your lands, then march.'):'Set your lands, raise arms, then march.';
+    h+='<button class="abtn" onclick="openShipyard()">Shipyard<small>ships</small></button>';
+    h+='<button class="abtn" onclick="openArsenal()">Arsenal<small>nukes</small></button>';
+    h+='<button class="abtn" onclick="openMarket()">Market<small>trade</small></button>';
+    h+='<button class="abtn primary" onclick="advance()">March<small>&rarr;</small></button>';
+  } else if(S.phase==='march'){
+    hint.innerHTML=atkFrom>=0?'Tap a highlighted border to strike, or tap your land to change origin.':'Tap one of your lands (2+) to attack from.';
+    var canNuke=pl.nukes>0 && E.ownedLands(S,p).some(function(i){return S.launcher[i];}) && pl.gas>=C.NUKE_FIRE_GAS;
+    h+='<button class="abtn" '+(canNuke?'':'disabled')+' onclick="startNuke()">Launch<small>nuke</small></button>';
+    h+='<button class="abtn primary" onclick="advance()">Maneuver<small>&rarr;</small></button>';
+  } else {
+    hint.innerHTML=S.fortifyUsed?'Fortify spent. End your turn.':'One fortify: tap a land (2+), then a connected land.';
+    h+='<button class="abtn primary" onclick="advance()">End Turn<small>&rarr;</small></button>';
+  }
+  bar.innerHTML=h;
+}
+function advance(){
+  if(S.phase==='maneuver'){
+    E.endPhase(S); save();
+    if(S.winner!==null){ showVictory(); return; }
+    routeTurn();
+  } else {
+    E.endPhase(S); sel=-1; atkFrom=-1; nukeFrom=-1; uimode=''; render();
+  }
+}
+
+/* ---- land sheet (court) ---- */
+function openLandSheet(i){
+  var p=S.turn, pl=S.players[p], sh=document.getElementById('sheet');
+  function chip(type,label,glyphcol){
+    var on=S.build[i]===type?' on':''; var cls='chip '+({farm:'crop',mill:'steel',refinery:'gas'}[type])+on;
+    return '<button class="'+cls+'" onclick="doBuild('+i+',\''+type+'\')">'+label+'<small>'+({farm:'crops',mill:'2 steel/t',refinery:'10 gas/t'}[type])+'</small></button>';
+  }
+  var h='';
+  h+='<div class="sheet-head"><span class="sh-dot" style="background:'+pl.color+'"></span><h3>'+cap(S.build[i]||'Holding')+'</h3>';
+  h+='<span class="sh-sub">'+S.troops[i]+' troops'+(S.coast[i]?' &middot; coastal':'')+'</span><button class="x" onclick="closeSheet()">&times;</button></div>';
+  h+='<div class="grp"><div class="grp-t">Set resource ('+C.BUILD_COST_COIN+' coin)</div><div class="chips">'+chip('farm','Farm')+chip('mill','Steel Mill')+chip('refinery','Refinery')+'</div></div>';
+  h+='<div class="grp"><div class="grp-t">Troops</div><div class="rowbtns">';
+  if(S.reinf>0) h+='<button class="chip" onclick="doPlace('+i+')">Muster +1<small>'+S.reinf+' left</small></button>';
+  h+='<button class="chip" '+(pl.coin<C.HIRE_COIN?'disabled':'')+' onclick="doHire('+i+')">Hire +'+C.HIRE_TROOPS+'<small>'+C.HIRE_COIN+' coin</small></button>';
+  h+='</div></div>';
+  h+='<div class="grp"><div class="grp-t">Arms ('+C.LAUNCHER_STEEL+' steel each)</div><div class="rowbtns">';
+  h+='<button class="chip" '+((S.launcher[i]||pl.steel<C.LAUNCHER_STEEL)?'disabled':'')+' onclick="doAsset('+i+',\'launcher\')">'+(S.launcher[i]?'Launcher set':'Nuke Launcher')+'</button>';
+  h+='<button class="chip" '+((S.interceptor[i]||pl.steel<C.INTERCEPTOR_STEEL)?'disabled':'')+' onclick="doAsset('+i+',\'interceptor\')">'+(S.interceptor[i]?'Interceptor set':'Interceptor')+'</button>';
+  h+='</div></div>';
+  sh.innerHTML=h; sh.classList.add('on');
+}
+function closeSheet(){ document.getElementById('sheet').classList.remove('on'); sel=-1; render(); }
+function doBuild(i,t){ var r=E.setBuilding(S,S.turn,i,t); if(!r.ok){toast(r.msg);return;} save(); openLandSheet(i); render(); }
+function doHire(i){ var r=E.hire(S,S.turn,i); if(!r.ok){toast(r.msg);return;} save(); openLandSheet(i); render(); }
+function doPlace(i){ var r=E.placeReinf(S,S.turn,i,1); if(!r.ok){toast(r.msg);return;} save(); openLandSheet(i); render(); }
+function doAsset(i,k){ var r=E.buildAsset(S,S.turn,i,k); if(!r.ok){toast(r.msg);return;} save(); openLandSheet(i); render(); }
+
+/* ---- shipyard / arsenal / market ---- */
+function openShipyard(){
+  var p=S.turn, pl=S.players[p];
+  var coastal=E.hasCoastalLand(S,p);
+  var body='<h2>Shipyard</h2><p class="msub">'+(coastal?'Each vessel carries '+C.SHIP_CAP+' troops across water.':'You hold no coastal land.')+'</p>';
+  body+='<div class="mkt-row"><span class="mk-i" style="background:#7fbfe0"></span><span class="mk-n">Naval vessels<small>'+C.SHIP_STEEL+' steel each</small></span><span class="mk-a">'+pl.ships+'</span></div>';
+  body+='<div class="stepper"><div class="stepval">'+pl.steel+'<small>steel</small></div></div>';
+  body+='<div class="mbtns"><button class="mbtn" onclick="closeModal()">Done</button><button class="mbtn primary" '+((!coastal||pl.steel<C.SHIP_STEEL)?'disabled':'')+' onclick="doShip()">Build ship</button></div>';
+  showModal(body);
+}
+function doShip(){ var r=E.buildShip(S,S.turn); if(!r.ok){toast(r.msg);return;} save(); openShipyard(); render(); }
+function openArsenal(){
+  var p=S.turn, pl=S.players[p];
+  var nukeCost=pl.nukes===0?C.NUKE_FIRST_STEEL:C.NUKE_NEXT_STEEL;
+  var rockCost=pl.rockets===0?C.ROCKET_FIRST_STEEL:C.ROCKET_NEXT_STEEL;
+  var body='<h2>Arsenal</h2><p class="msub">Steel &amp; risk. The first of each type is a coin-flip to complete.</p>';
+  body+='<div class="mkt-row"><span class="mk-i" style="background:var(--ember)"></span><span class="mk-n">Nukes<small>'+nukeCost+' steel'+(pl.nukes===0?' &middot; 50% first':'')+' &middot; needs a launcher</small></span><span class="mk-a">'+pl.nukes+'</span></div>';
+  body+='<div class="mbtns" style="margin-bottom:12px"><button class="mbtn primary" '+(pl.steel<nukeCost?'disabled':'')+' onclick="doMfg(\'nuke\')">Forge nuke</button></div>';
+  body+='<div class="mkt-row"><span class="mk-i" style="background:#6ec0ff"></span><span class="mk-n">Defensive rockets<small>'+rockCost+' steel'+(pl.rockets===0?' &middot; 50% first':'')+' &middot; needs an interceptor</small></span><span class="mk-a">'+pl.rockets+'</span></div>';
+  body+='<div class="mbtns" style="margin-bottom:14px"><button class="mbtn primary" '+(pl.steel<rockCost?'disabled':'')+' onclick="doMfg(\'rocket\')">Forge rocket</button></div>';
+  body+='<div class="mkt-row"><span class="mk-i" style="background:var(--steel)"></span><span class="mk-n">Steel in stock</span><span class="mk-a">'+Math.round(pl.steel)+'</span></div>';
+  body+='<div class="mbtns" style="margin-top:12px"><button class="mbtn" onclick="closeModal()">Done</button></div>';
+  showModal(body);
+}
+function doMfg(kind){
+  var r=E.manufacture(S,S.turn,kind); if(!r.ok){toast(r.msg);return;}
+  toast(r.success?('A '+kind+' is ready.'):('The '+kind+' failed on the bench. Steel spent.'));
+  save(); openArsenal(); render();
+}
+function openMarket(){
+  var pl=S.players[S.turn];
+  function row(k,name,color){
+    var price=C.SELL[k]; var amt=Math.round(pl[k]);
+    var h='<div class="mkt-row"><span class="mk-i" style="background:'+color+'"></span><span class="mk-n">'+name+'<small>'+priceLabel(k)+'</small></span><span class="mk-a">'+amt+'</span></div>';
+    h+='<div class="mkt-sell">';
+    [10,25,'half','all'].forEach(function(q){ h+='<button onclick="doSell(\''+k+'\',\''+q+'\')">'+(q==='half'?'Half':q==='all'?'All':q)+'</button>'; });
+    h+='</div>';
+    return h;
+  }
+  var body='<h2>Open Market</h2><p class="msub">Sell surplus for coin. Prices are fixed by the market.</p>';
+  body+=row('crops','Crops','var(--crop)')+row('steel','Steel','var(--steel)')+row('gas','Gas','var(--gas)');
+  body+='<div class="mkt-row" style="margin-top:10px"><span class="mk-i" style="background:#e8b45f"></span><span class="mk-n">Treasury</span><span class="mk-a">'+pl.coin+' coin</span></div>';
+  body+='<div class="mbtns" style="margin-top:12px"><button class="mbtn primary" onclick="closeModal()">Done</button></div>';
+  showModal(body);
+}
+function priceLabel(k){
+  if(k==='crops')return '1 coin / 4 units';
+  if(k==='steel')return '3 coin / unit';
+  return '1 coin / 5 units';
+}
+function doSell(k,q){
+  var pl=S.players[S.turn]; var units;
+  if(q==='all')units=pl[k]; else if(q==='half')units=Math.floor(pl[k]/2); else units=Math.min(parseInt(q,10),pl[k]);
+  var r=E.sell(S,S.turn,k,units); if(!r.ok){toast(r.msg);return;}
+  toast('Sold '+r.units+' '+k+' for '+r.coin+' coin.'); save(); openMarket(); render();
+}
+
+/* ---- attack modal (dice) ---- */
+var atkState=null;
+function openAttack(from,to){
+  var maxC=S.troops[from]-1, naval=E.landNeighbors(S,from).indexOf(to)<0;
+  if(naval){ var avail=S.players[S.turn].ships-S.shipsUsed; maxC=Math.min(maxC, C.SHIP_CAP*avail); }
+  atkState={from:from,to:to,naval:naval,commit:Math.min(maxC,Math.max(1,maxC)),max:maxC,done:false};
+  drawAttack();
+}
+function drawAttack(){
+  var a=atkState, from=a.from,to=a.to, pl=S.players[S.turn];
+  var body='<h2>'+(a.naval?'Amphibious Assault':'Assault')+'</h2>';
+  body+='<p class="msub">'+cap(S.build[from]||'holding')+' &rarr; '+(S.owner[to]<0?'neutral':S.players[S.owner[to]].name)+' land</p>';
+  body+='<div class="fight"><div class="fside"><div class="flabel" style="color:'+pl.color+'">You</div><div class="fterr" id="fFrom">'+S.troops[from]+' here</div><div class="dice" id="dA"></div></div>';
+  body+='<div class="vs">vs</div>';
+  body+='<div class="fside"><div class="flabel" style="color:'+(S.owner[to]<0?'var(--neutral)':S.players[S.owner[to]].color)+'">Foe</div><div class="fterr" id="fTo">'+S.troops[to]+' hold</div><div class="dice" id="dD"></div></div></div>';
+  body+='<div class="fresult" id="fres">Commit troops, then roll.</div>';
+  body+='<div id="atkControls">'+atkControlsHTML()+'</div>';
+  showModal(body);
+}
+function atkControlsHTML(){
+  var a=atkState, pl=S.players[S.turn];
+  if(a.done){ return '<div class="mbtns"><button class="mbtn primary" onclick="closeModal();finishAtk()">Continue</button></div>'; }
+  var gas = a.naval ? Math.ceil(a.commit/C.SHIP_CAP)*C.SHIP_MOVE_GAS : a.commit*C.MARCH_GAS_PER_TROOP;
+  var canRoll = pl.gas>=gas && a.commit>=1 && S.troops[a.from]>1;
+  var h='<div class="stepper"><button class="stepbtn" onclick="stepAtk(-1)">&minus;</button><div class="stepval">'+a.commit+'<small>'+(a.naval?'embark ('+gas+' gas)':'attack ('+gas+' gas)')+'</small></div><button class="stepbtn" onclick="stepAtk(1)">+</button></div>';
+  h+='<div class="mbtns"><button class="mbtn" onclick="closeModal();cancelAtk()">Retreat</button><button class="mbtn" '+(canRoll?'':'disabled')+' onclick="runAtk(false)">Roll once</button><button class="mbtn primary" '+(canRoll?'':'disabled')+' onclick="runAtk(true)">Blitz</button></div>';
+  return h;
+}
+function stepAtk(d){ atkState.commit=Math.max(1,Math.min(atkState.max,atkState.commit+d)); var c=document.getElementById('atkControls'); if(c)c.innerHTML=atkControlsHTML(); }
+function cancelAtk(){ atkState=null; render(); }
+function runAtk(blitz){
+  var a=atkState; if(!a) return;
+  var pl=S.players[S.turn];
+  var res = a.naval ? E.navalAttack(S,S.turn,a.from,a.to,a.commit,blitz) : E.landAttack(S,S.turn,a.from,a.to,a.commit,blitz);
+  if(!res.ok){ toast(res.msg); return; }
+  var last=res.log[res.log.length-1];
+  showDice('dA',last.a,'att',last); showDice('dD',last.d,'def',last);
+  var ff=document.getElementById('fFrom'), ft=document.getElementById('fTo');
+  if(ff) ff.textContent=S.troops[a.from]+' here';
+  if(ft) ft.textContent=S.troops[a.to]+' hold';
+  var fr=document.getElementById('fres');
+  if(res.captured){ fr.innerHTML='<b>Land taken.</b> '+res.atkRemain+' troops advance.'; a.done=true; pushLog(S.players[S.turn].name+' seized a '+(a.naval?'coast by sea':'border')+'.',true); }
+  else { fr.innerHTML='Foe holds with <b>'+res.defRemain+'</b>. You committed <b>'+res.atkRemain+'</b>.'; }
+  a.max = a.naval ? Math.min(S.troops[a.from]-1, C.SHIP_CAP*(pl.ships-S.shipsUsed)) : S.troops[a.from]-1;
+  if(a.max<1 && !res.captured){ a.done=true; fr.innerHTML='<b>Assault broken.</b> The attack is spent.'; }
+  a.commit=Math.max(1,Math.min(a.max,a.commit));
+  save();
+  if(S.winner!==null){ a.done=true; var cc=document.getElementById('atkControls'); if(cc)cc.innerHTML='<div class="mbtns"><button class="mbtn primary" onclick="closeModal();showVictory()">Continue</button></div>'; return; }
+  var c=document.getElementById('atkControls'); if(c) c.innerHTML=atkControlsHTML();
+}
+function finishAtk(){ atkState=null; atkFrom=-1; render(); }
+function showDice(id,vals,side,r){
+  var el=document.getElementById(id); if(!el)return; el.innerHTML='';
+  var wins = side==='att' ? winMaskAtt(r) : winMaskDef(r);
+  vals.forEach(function(v,idx){
+    var d=document.createElement('div');
+    d.className='die '+(side==='def'?'def':'')+' rolling '+(wins[idx]?'win':'lose');
+    d.innerHTML=pips(v);
+    el.appendChild(d);
+  });
+}
+function winMaskAtt(r){ var m=[]; var pairs=Math.min(r.a.length,r.d.length); for(var i=0;i<r.a.length;i++){ m.push(i<pairs && r.a[i]>r.d[i]); } return m; }
+function winMaskDef(r){ var m=[]; var pairs=Math.min(r.a.length,r.d.length); for(var i=0;i<r.d.length;i++){ m.push(i<pairs && r.d[i]>=r.a[i]); } return m; }
+function pips(v){ var pos={1:[4],2:[0,8],3:[0,4,8],4:[0,2,6,8],5:[0,2,4,6,8],6:[0,2,3,5,6,8]}; var s=''; for(var k=0;k<9;k++){ s+= pos[v].indexOf(k)>=0?'<span class="pip"></span>':'<span></span>'; } return s; }
+
+/* ---- fortify ---- */
+var fortState=null;
+function openFortify(from,to){
+  var naval=E.landNeighbors(S,from).indexOf(to)<0;
+  fortState={from:from,to:to,naval:naval,n:Math.max(1,S.troops[from]-1),max:S.troops[from]-1};
+  drawFortify();
+}
+function drawFortify(){
+  var f=fortState;
+  var gas=f.naval?Math.ceil(f.n/C.SHIP_CAP)*C.SHIP_MOVE_GAS:f.n*C.MARCH_GAS_PER_TROOP;
+  var body='<h2>Fortify</h2><p class="msub">'+(f.naval?'By sea':'By land')+' &middot; move troops to consolidate</p>';
+  body+='<div class="stepper"><button class="stepbtn" onclick="stepFort(-1)">&minus;</button><div class="stepval">'+f.n+'<small>move ('+gas+' gas)</small></div><button class="stepbtn" onclick="stepFort(1)">+</button></div>';
+  var pl=S.players[S.turn]; var can=pl.gas>=gas && f.n>=1;
+  body+='<div class="mbtns"><button class="mbtn" onclick="closeModal();cancelFort()">Cancel</button><button class="mbtn primary" '+(can?'':'disabled')+' onclick="doFort()">Move</button></div>';
+  showModal(body);
+}
+function stepFort(d){ fortState.n=Math.max(1,Math.min(fortState.max,fortState.n+d)); drawFortify(); }
+function cancelFort(){ fortState=null; atkFrom=-1; render(); }
+function doFort(){ var f=fortState; var r=E.fortify(S,S.turn,f.from,f.to,f.n); if(!r.ok){toast(r.msg);return;} toast('Troops repositioned.'); fortState=null; atkFrom=-1; closeModal(); save(); render(); }
+
+/* ---- nuke ---- */
+function startNuke(){
+  var p=S.turn, launchers=E.ownedLands(S,p).filter(function(i){return S.launcher[i];});
+  if(!launchers.length){ toast('No launcher'); return; }
+  uimode='nuke'; nukeFrom=launchers[0]; atkFrom=-1; render();
+  toast('Launching from a silo. Tap an enemy land.');
+}
+function confirmNuke(from,target){
+  var defId=S.owner[target];
+  var defName = defId<0?'neutral land':S.players[defId].name+"'s land";
+  var body='<h2>Launch Nuke</h2><p class="msub">Strike '+defName+'? Costs '+C.NUKE_FIRE_GAS+' gas. A hit leaves a permanent crater no one can ever hold.</p>';
+  body+='<p class="msub" style="color:var(--dim);margin-bottom:14px">'+S.detonations+' of '+C.WINTER_LIMIT+' detonations so far. More than '+C.WINTER_LIMIT+' brings nuclear winter and everyone loses.</p>';
+  body+='<div class="mbtns"><button class="mbtn" onclick="closeModal();cancelNuke()">Stand down</button><button class="mbtn primary" onclick="launchNuke('+from+','+target+')">Fire</button></div>';
+  showModal(body);
+}
+function launchNuke(from,target){
+  var defId=S.owner[target];
+  var humanDef = defId>=0 && !S.players[defId].isAI && defId!==S.turn;
+  if(humanDef && E.maxDefenseRockets(S,defId)>0){ openDefense(from,target,defId); return; }
+  var rk = (defId>=0 && S.players[defId].isAI) ? E.defenderAutoRockets(S,defId) : 0;
+  resolveNuke(from,target,rk);
+}
+var defState=null;
+function openDefense(from,target,defId){
+  var maxR=E.maxDefenseRockets(S,defId);
+  defState={from:from,target:target,defId:defId,n:Math.min(maxR,2),max:maxR};
+  drawDefense();
+}
+function drawDefense(){
+  var d=defState, dp=S.players[d.defId];
+  var pInt=Math.round((1-Math.pow(1/3,d.n))*100);
+  var body='<h2>Incoming Nuke</h2><p class="msub"><b>'+dp.name+'</b>, a warhead is inbound. Commit your rockets now, all at once. You cannot fire again after seeing the result.</p>';
+  body+='<div class="stepper"><button class="stepbtn" onclick="stepDef(-1)">&minus;</button><div class="stepval">'+d.n+'<small>rockets</small></div><button class="stepbtn" onclick="stepDef(1)">+</button></div>';
+  body+='<p class="msub">'+(d.n===0?'No defense. The nuke lands on a 2 in 3.':'Intercept chance <b>'+pInt+'%</b> &middot; '+C.ROCKET_FIRE_GAS+' gas + '+d.n+' rocket'+(d.n>1?'s':''))+'</p>';
+  body+='<div class="mbtns"><button class="mbtn primary" onclick="commitDefense()">'+(d.n===0?'Take the hit':'Fire salvo')+'</button></div>';
+  showModal(body);
+}
+function stepDef(x){ defState.n=Math.max(0,Math.min(defState.max,defState.n+x)); drawDefense(); }
+function commitDefense(){ var d=defState; defState=null; resolveNuke(d.from,d.target,d.n); }
+function cancelNuke(){ uimode=''; nukeFrom=-1; render(); }
+function resolveNuke(from,target,rk){
+  var r=E.fireNuke(S,S.turn,from,target,rk); closeModal(); uimode=''; nukeFrom=-1;
+  if(!r.ok){ toast(r.msg); render(); return; }
+  if(r.outcome==='intercepted'){ toast('Intercepted! '+r.intercepts+' rocket'+(r.intercepts>1?'s':'')+' knocked it down.'); pushLog(S.players[S.turn].name+"'s nuke was intercepted.",true); }
+  else if(r.outcome==='dud'){ toast('The warhead misfired. A dud.'); pushLog(S.players[S.turn].name+"'s nuke fizzled.",false); }
+  else if(r.outcome==='detonated'){ toast('Detonation. The land is scorched forever.'); pushLog(S.players[S.turn].name+' nuked a territory ('+r.detonations+'/'+C.WINTER_LIMIT+').',true); }
+  else if(r.outcome==='nuclear_winter'){ pushLog('Nuclear winter falls. The realm is ash.',true); save(); render(); showNuclearWinter(); return; }
+  save();
+  if(S.winner!==null){ showVictory(); return; }
+  render();
+}
+
+/* ---- modal / drawer / toast ---- */
+function showModal(html){ document.getElementById('modal').innerHTML=html; document.getElementById('scrim').classList.add('on'); }
+function closeModal(){ document.getElementById('scrim').classList.remove('on'); }
+document.getElementById('scrim').addEventListener('click',function(e){ if(e.target===this && !atkState && !fortState) closeModal(); });
+function openDrawer(){ renderDrawer(); document.getElementById('drawer').classList.add('on'); }
+function closeDrawer(){ document.getElementById('drawer').classList.remove('on'); }
+function renderDrawer(){
+  var totalLand=E.occupiableCount(S);
+  var h='<div class="std-title">Houses</div>';
+  S.players.forEach(function(pl){
+    var lands=E.ownedLands(S,pl.id).length, tr=E.totalTroops(S,pl.id);
+    h+='<div class="pl-row '+(pl.alive?'':'dead')+(pl.id===S.turn?' turn':'')+'"><span class="pl-dot" style="background:'+pl.color+'"></span><span class="pl-nm">'+pl.name+'<em>'+(pl.isAI?pl.ai:'you')+'</em></span><span class="pl-stat"><b>'+lands+'</b> lands &middot; <b>'+tr+'</b> troops<br>'+Math.round(lands/totalLand*100)+'% of realm</span></div>';
+  });
+  h+='<div class="std-title">Chronicle</div><ul class="log" id="logList"></ul>';
+  if(isHuman(S.turn)) h+='<div style="margin-top:16px"><button class="mbtn" style="width:100%;color:var(--ember);border-color:rgba(216,97,58,.4)" onclick="confirmConcede()">Concede this house</button></div>';
+  h+='<div style="margin-top:8px"><button class="mbtn" style="width:100%" onclick="quitToMenu()">Save &amp; quit to menu</button></div>';
+  document.getElementById('drawerBody').innerHTML=h;
+  renderLogList();
+}
+var LOG=[];
+function pushLog(txt,big){ LOG.unshift({t:txt,big:big}); if(LOG.length>40)LOG.pop(); renderLogList(); }
+function renderLogList(){ var el=document.getElementById('logList'); if(!el)return; el.innerHTML=LOG.map(function(l){return '<li class="'+(l.big?'big':'')+'">'+l.t+'</li>';}).join('')||'<li>The realm is quiet.</li>'; }
+function quitToMenu(){ closeDrawer(); document.getElementById('game').classList.remove('on'); document.getElementById('setup').style.display='flex'; document.getElementById('resumeBtn').style.display=hasSave()?'block':'none'; }
+
+function toast(msg){ var t=document.getElementById('toast'); t.textContent=msg; t.classList.add('on'); clearTimeout(t._t); t._t=setTimeout(function(){t.classList.remove('on');},1900); }
+function cap(s){ return s?s.charAt(0).toUpperCase()+s.slice(1):s; }
+
+/* ---- victory ---- */
+function showVictory(){
+  var w=S.winner, humansAlive=S.players.some(function(p){return !p.isAI && p.alive;});
+  var wonByHuman = w!==null && !S.players[w].isAI;
+  var title, sub, crestStroke='#e8b45f';
+  if(w===null){ title='Stalemate'; sub='No house remains.'; }
+  else if(wonByHuman){ title=S.players[w].name+' Reigns'; sub='The last rival house has fallen. The realm is yours.'; }
+  else { title='The Realm Falls'; sub=S.players[w].name+' has conquered the map. Your banner is struck.'; }
+  var body='<div class="vic"><div class="vcrest"><svg viewBox="0 0 24 24" fill="none"><path d="M12 2l7 3v6c0 4.5-3 8-7 11-4-3-7-6.5-7-11V5l7-3z" fill="#2b3548" stroke="'+crestStroke+'" stroke-width="1.3"/><path d="M8 11l2.5 2.5L16 8" stroke="'+crestStroke+'" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>';
+  body+='<h2 class="cz">'+title+'</h2><p>'+sub+'</p>';
+  if(wonByHuman){ body+='<div class="ribbon">AppADay No. 075 &middot; three quarters to 100</div><div style="height:14px"></div>'; }
+  body+='<div class="mbtns"><button class="mbtn primary" onclick="newCampaign()">New campaign</button></div></div>';
+  try{ localStorage.removeItem(SAVE); }catch(e){}
+  showModal(body);
+}
+function newCampaign(){ closeModal(); quitToMenu(); }
+function confirmConcede(){
+  if(!isHuman(S.turn)) return;
+  var pl=S.players[S.turn];
+  var body='<h2>Concede</h2><p class="msub"><b>'+pl.name+'</b>, withdraw from the war? Your holdings fall to ruin and revert to neutral ground. This cannot be undone.</p>';
+  body+='<div class="mbtns"><button class="mbtn" onclick="closeModal()">Fight on</button><button class="mbtn primary" onclick="doConcede()">Concede</button></div>';
+  showModal(body);
+}
+function doConcede(){
+  var who=S.turn; closeDrawer(); closeModal();
+  var r=E.concede(S, who); if(!r.ok){ toast(r.msg||'Cannot concede'); return; }
+  pushLog(S.players[who].name+' concedes the war.', true);
+  save();
+  if(S.ended==='nuclear_winter'){ showNuclearWinter(); return; }
+  if(S.winner!==null){ showVictory(); return; }
+  if(!S.players.some(function(p){return !p.isAI && p.alive;})){ showConceded(); return; }
+  sel=-1; atkFrom=-1; nukeFrom=-1; uimode='';
+  E.endTurn(S); save();
+  routeTurn();
+}
+function showConceded(){
+  var body='<div class="vic"><div class="vcrest"><svg viewBox="0 0 24 24" fill="none"><path d="M12 2l7 3v6c0 4.5-3 8-7 11-4-3-7-6.5-7-11V5l7-3z" fill="#2b3548" stroke="#93a1bb" stroke-width="1.3"/><path d="M8 12h8" stroke="#93a1bb" stroke-width="1.6" stroke-linecap="round"/></svg></div>';
+  body+='<h2 class="cz">You Withdraw</h2><p>Your banner leaves the field. The war goes on without you.</p>';
+  body+='<div class="mbtns"><button class="mbtn primary" onclick="newCampaign()">New campaign</button></div></div>';
+  try{ localStorage.removeItem(SAVE); }catch(e){}
+  showModal(body);
+}
+function showNuclearWinter(){
+  var body='<div class="vic"><div class="vcrest" style="border-color:var(--ember)"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" fill="#1a1414" stroke="#d8613a" stroke-width="1.3"/><circle cx="12" cy="12" r="2.4" fill="#e8b45f"/><path d="M12 4.2v4.2M7.4 15l3.5-2M16.6 15l-3.5-2" stroke="#e8b45f" stroke-width="1.6" stroke-linecap="round"/></svg></div>';
+  body+='<h2 class="cz">Nuclear Winter</h2><p>More than '+C.WINTER_LIMIT+' warheads have scorched the earth. Ash blots out the sun and every crop fails. No banner survives. All houses lose.</p>';
+  body+='<div class="ribbon">AppADay No. 075 &middot; the realm is ash</div><div style="height:14px"></div>';
+  body+='<div class="mbtns"><button class="mbtn primary" onclick="newCampaign()">New campaign</button></div></div>';
+  try{ localStorage.removeItem(SAVE); }catch(e){}
+  showModal(body);
+}
+
+/* init */
+(function init(){ document.getElementById('resumeBtn').style.display=hasSave()?'block':'none'; adjP('h',0); })();
+</script>
+</body>
+</html>
