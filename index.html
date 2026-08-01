@@ -159,9 +159,41 @@
   .mkt-row .mk-n{font-weight:700;font-size:13px}
   .mkt-row .mk-n small{display:block;font-weight:500;font-size:10.5px;color:var(--dim)}
   .mkt-row .mk-a{margin-left:auto;font-weight:800;color:var(--parch);font-variant-numeric:tabular-nums}
-  .mkt-sell{display:flex;gap:5px;margin-top:6px}
-  .mkt-sell button{flex:1;padding:8px 4px;border-radius:8px;font-size:11.5px;font-weight:700;background:var(--panel);border:1px solid var(--line);color:var(--muted)}
+  .mkt-sell{display:flex;gap:5px;margin-top:6px;align-items:center}
+  .mkt-buy{display:flex;gap:5px;margin-top:5px;align-items:center}
+  .mkt-tag{font-size:9.5px;text-transform:uppercase;letter-spacing:.8px;font-weight:700;color:var(--dim);width:32px;flex-shrink:0}
+  .mkt-sell button,.mkt-buy button{flex:1;padding:8px 4px;border-radius:8px;font-size:11.5px;font-weight:700;background:var(--panel);border:1px solid var(--line);color:var(--muted)}
   .mkt-sell button:active{border-color:var(--brass);color:var(--parch)}
+  .mkt-buy button:active{border-color:var(--good);color:var(--parch)}
+  .aiplay{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(14px);width:min(440px,92vw);z-index:44;background:linear-gradient(180deg,rgba(28,36,49,.98),rgba(18,23,33,.99));border:1px solid var(--brass);border-radius:14px;box-shadow:var(--shadow);padding:12px 15px;opacity:0;pointer-events:none;transition:opacity .25s,transform .25s}
+  .aiplay.on{opacity:1;transform:translateX(-50%) translateY(0);pointer-events:auto;cursor:pointer}
+  .aip-head{display:flex;align-items:center;gap:8px;margin-bottom:7px}
+  .aip-dot{width:11px;height:11px;border-radius:50%;box-shadow:0 0 8px currentColor;flex-shrink:0}
+  .aip-name{font-family:'Cinzel',serif;font-weight:600;font-size:14px;letter-spacing:1px;color:var(--parch)}
+  .aip-turn{margin-left:auto;font-size:10px;letter-spacing:.6px;color:var(--dim)}
+  .aip-lines{display:flex;flex-direction:column;gap:5px}
+  .aip-line{font-size:12.5px;line-height:1.4;color:var(--muted);padding-left:14px;position:relative;opacity:0;transform:translateY(5px);transition:opacity .3s,transform .3s}
+  .aip-line.show{opacity:1;transform:translateY(0)}
+  .aip-line::before{content:"";position:absolute;left:2px;top:7px;width:5px;height:5px;border-radius:50%;background:var(--brass)}
+  .setup-links{display:flex;align-items:center;justify-content:center;gap:14px;margin-top:14px}
+  .setup-links button{background:none;border:none;color:var(--brass-bright);font-weight:600;font-size:13px;letter-spacing:.3px;padding:4px 2px}
+  .setup-links button:hover{text-decoration:underline}
+  .setup-links .sl-div{width:1px;height:14px;background:var(--line)}
+  .coach{position:fixed;left:50%;top:132px;transform:translateX(-50%) translateY(-12px);width:min(460px,93vw);z-index:47;background:linear-gradient(180deg,#232c3c,#1a212e);border:1px solid var(--brass);border-radius:14px;box-shadow:var(--shadow);padding:14px 16px 13px;opacity:0;pointer-events:none;transition:opacity .25s,transform .25s}
+  .coach.on{opacity:1;transform:translateX(-50%) translateY(0);pointer-events:auto}
+  .coach-head{display:flex;align-items:center;margin-bottom:7px}
+  .coach-badge{font-family:'Cinzel',serif;font-weight:700;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--ink);background:linear-gradient(180deg,var(--brass-bright),var(--brass));padding:3px 8px;border-radius:5px}
+  .coach-text{font-size:13.5px;line-height:1.55;color:var(--text);margin-bottom:11px}
+  .coach-text b{color:var(--brass-bright);font-weight:600}
+  .coach-btn{display:block;margin-left:auto;padding:8px 18px;border-radius:9px;font-weight:700;font-size:13px;background:linear-gradient(180deg,var(--brass-bright),var(--brass));color:var(--ink);border:none}
+  .coach-live .abtn.primary{animation:tutpulse 1.4s ease-in-out infinite}
+  @keyframes tutpulse{0%,100%{box-shadow:0 0 0 0 rgba(232,180,95,.0)}50%{box-shadow:0 0 0 4px rgba(232,180,95,.45)}}
+  .help-sec{margin-bottom:15px}
+  .help-sec:last-of-type{margin-bottom:4px}
+  .help-h{font-family:'Cinzel',serif;font-size:13px;letter-spacing:.8px;color:var(--brass-bright);margin:0 0 5px;display:flex;align-items:center;gap:7px}
+  .help-h .hi{width:9px;height:9px;border-radius:2px;flex-shrink:0}
+  .help-p{font-size:12.8px;line-height:1.55;color:var(--muted);margin:0}
+  .help-p b{color:var(--parch);font-weight:600}
 
   /* drawer */
   .drawer{position:fixed;top:0;right:0;height:100dvh;width:min(340px,88vw);z-index:48;background:linear-gradient(180deg,var(--panel),var(--ink2));border-left:1px solid var(--line);box-shadow:var(--shadow);transform:translateX(102%);transition:transform .28s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column}
@@ -234,6 +266,11 @@
       </div>
       <button class="startbtn" onclick="startGame()">RAISE YOUR BANNER</button>
       <button class="resume" id="resumeBtn" style="display:none" onclick="resumeGame()">Resume last campaign</button>
+      <div class="setup-links">
+        <button onclick="startTutorial()">Play the tutorial</button>
+        <span class="sl-div"></span>
+        <button onclick="openHelp()">How to play</button>
+      </div>
       <div class="rules">
         <b>Court:</b> collect income, set each land to a farm, mill, or refinery, muster and hire troops, build ships and arms. <b>March:</b> attack across borders and by sea. <b>Maneuver:</b> one fortify move. Feed every troop each turn or risk desertion. Outlast every rival house to rule, but if more than five nukes ever detonate, nuclear winter ends the world and all lose.
       </div>
@@ -257,6 +294,10 @@
   </div>
 </div>
 
+<!-- AI narrative panel -->
+<div class="aiplay" id="aiplay"></div>
+<!-- tutorial coach -->
+<div class="coach" id="coach"></div>
 <!-- bottom sheet -->
 <div class="sheet" id="sheet"></div>
 <!-- drawer -->
@@ -410,7 +451,9 @@ const C = {
   MARCH_GAS_PER_TROOP:1,
   BUILD_COST_COIN:6, BASE_TAX_PER_TERR:1,
   HIRE_COIN:6, HIRE_TROOPS:2,
-  SELL:{ crops:0.25, steel:3, gas:0.2 },
+  MKT_BASE:{ crops:0.30, steel:3.5, gas:0.25 },
+  MKT_DEPTH:{ crops:320, steel:34, gas:170 },
+  MKT_SPREAD:0.15, MKT_MINF:0.35, MKT_MAXF:2.8, MKT_REVERT:0.10,
   COLORS:['#e8b45f','#d8503f','#4a8fd8','#5cae6a','#b57edc','#4fc4c0'],
   NAMES:['Crown','Ember','Tide','Verdant','Amethyst','Aegis']
 };
@@ -437,6 +480,7 @@ function newGame(world, humans, ais, difficulty){
     interceptor:new Array(world.N).fill(false),
     crater:new Array(world.N).fill(false),
     detonations:0, ended:null,
+    market:{ crops:C.MKT_BASE.crops, steel:C.MKT_BASE.steel, gas:C.MKT_BASE.gas },
     players:[], turn:0, phase:'build', round:1, log:[],
     fortifyUsed:false, shipsUsed:0, reinf:0,
     rseed:((world.seed>>>0)*2654435761)>>>0, winner:null
@@ -481,6 +525,7 @@ function reinforcements(s,p){ const t=ownedLands(s,p).length; return Math.max(3,
 
 function beginTurn(s,p){
   const pl=s.players[p]; if(!pl||!pl.alive){ s.reinf=0; return; }
+  marketDrift(s);
   runUpkeep(s,p);
   s.reinf = pl.alive ? reinforcements(s,p) : 0;
 }
@@ -535,11 +580,31 @@ function manufacture(s,p,kind){
   if(success){ if(kind==='nuke')pl.nukes++; else pl.rockets++; }
   return {ok:true,success,first,cost};
 }
+function mktGuard(s){ if(!s.market) s.market={ crops:C.MKT_BASE.crops, steel:C.MKT_BASE.steel, gas:C.MKT_BASE.gas }; }
+function sellUnit(s,c){ mktGuard(s); return s.market[c]*(1-C.MKT_SPREAD); }
+function buyUnit(s,c){ mktGuard(s); return s.market[c]*(1+C.MKT_SPREAD); }
+function mktMove(s,c,units,dir){
+  mktGuard(s); const base=C.MKT_BASE[c], depth=C.MKT_DEPTH[c];
+  let pr=s.market[c];
+  if(dir<0) pr = pr/(1+units/depth); else pr = pr*(1+units/depth);
+  s.market[c]=Math.max(base*C.MKT_MINF, Math.min(base*C.MKT_MAXF, pr));
+}
+function marketDrift(s){ mktGuard(s); for(const c of ['crops','steel','gas']){ const base=C.MKT_BASE[c]; s.market[c]+=(base-s.market[c])*C.MKT_REVERT; } }
 function sell(s,p,commodity,units){
-  const pl=s.players[p]; units=Math.min(units,pl[commodity]);
+  const pl=s.players[p]; units=Math.min(Math.floor(units),Math.floor(pl[commodity]));
   if(units<=0) return {ok:false,msg:'Nothing to sell'};
-  const coin=Math.floor(units*C.SELL[commodity]); pl[commodity]-=units; pl.coin+=coin;
+  const coin=Math.floor(units*sellUnit(s,commodity));
+  pl[commodity]-=units; pl.coin+=coin; mktMove(s,commodity,units,-1);
   return {ok:true,coin,units};
+}
+function buy(s,p,commodity,units){
+  const pl=s.players[p]; const unit=buyUnit(s,commodity);
+  const affordable=Math.floor(pl.coin/unit);
+  units=Math.min(Math.floor(units), affordable);
+  if(units<=0) return {ok:false,msg:'Not enough coin'};
+  const cost=Math.ceil(units*unit);
+  pl.coin-=cost; pl[commodity]+=units; mktMove(s,commodity,units,1);
+  return {ok:true,cost,units};
 }
 function hire(s,p,i){
   const pl=s.players[p]; if(s.owner[i]!==p) return {ok:false,msg:'Not your land'};
@@ -690,7 +755,7 @@ function E_ownedCount(s,p){ let n=0; for(let i=0;i<s.N;i++) if(s.owner[i]===p&&!
 
 root.FiefEngine={ C, newGame, beginTurn, runUpkeep, ownedLands, countBuild, totalTroops, hasCoastalLand,
   landNeighbors, reinforcements, setBuilding, buildShip, buildAsset, manufacture, sell, hire, placeReinf,
-  resolveCombat, landAttack, navalAttack, fortify, fireNuke, hasInterceptor, maxDefenseRockets, defenderAutoRockets, occupiableCount, concede, endPhase, endTurn, checkWinner, dist };
+  resolveCombat, landAttack, navalAttack, fortify, fireNuke, hasInterceptor, maxDefenseRockets, defenderAutoRockets, occupiableCount, concede, buy, sellUnit, buyUnit, marketDrift, endPhase, endTurn, checkWinner, dist };
 
 })(typeof module!=='undefined'?module.exports:(this.window=this.window||this));
 </script>
@@ -854,12 +919,63 @@ function maneuverTurn(s,p){
   if(n>0 && s.players[p].gas>=n) E.fortify(s,p,src,dsts[0],n);
 }
 
+function snapshot(s,p){
+  const owned=E.ownedLands(s,p);
+  return {
+    lands:owned.length, troops:E.totalTroops(s,p),
+    ships:s.players[p].ships, nukes:s.players[p].nukes, rockets:s.players[p].rockets,
+    coin:s.players[p].coin, crops:s.players[p].crops, steel:s.players[p].steel, gas:s.players[p].gas,
+    farm:E.countBuild(s,p,'farm'), mill:E.countBuild(s,p,'mill'), refinery:E.countBuild(s,p,'refinery'),
+    launch:owned.filter(i=>s.launcher[i]).length, intc:owned.filter(i=>s.interceptor[i]).length,
+    owner:s.owner.slice(), crater:s.crater.slice()
+  };
+}
+function jplural(n,w){ return n+' '+w+(n===1?'':'s'); }
+function jlist(a){ a=a.filter(Boolean); if(a.length<=1)return a[0]||''; if(a.length===2)return a[0]+' and '+a[1]; return a.slice(0,-1).join(', ')+', and '+a[a.length-1]; }
+function jcap(x){ return x?x.charAt(0).toUpperCase()+x.slice(1):x; }
+function narrate(s,p,name,a,b,c,fort){
+  const lines=[];
+  const eco=[];
+  const df=b.farm-a.farm, dm=b.mill-a.mill, dr=b.refinery-a.refinery, builds=[];
+  if(df>0)builds.push(jplural(df,'farm')); if(dm>0)builds.push(jplural(dm,'steel mill')); if(dr>0)builds.push(jplural(dr,'refinery'));
+  if(builds.length) eco.push('raised '+jlist(builds));
+  if(b.ships-a.ships>0) eco.push('laid down '+jplural(b.ships-a.ships,'warship'));
+  if(b.launch-a.launch>0) eco.push('built '+jplural(b.launch-a.launch,'launcher'));
+  if(b.intc-a.intc>0) eco.push('raised '+jplural(b.intc-a.intc,'interceptor'));
+  if(b.nukes-a.nukes>0) eco.push('forged '+jplural(b.nukes-a.nukes,'nuke'));
+  if(b.rockets-a.rockets>0) eco.push('forged '+jplural(b.rockets-a.rockets,'rocket'));
+  if((a.crops-b.crops>5||a.steel-b.steel>2||a.gas-b.gas>5) && b.coin>a.coin) eco.push('sold surplus at market');
+  const muster=b.troops-a.troops; if(muster>0) eco.push('mustered '+jplural(muster,'troop'));
+  if(eco.length) lines.push(jcap(name+' '+jlist(eco)+'.'));
+  // captures during march (b -> c owners)
+  const byPrev={};
+  for(let i=0;i<s.N;i++){ if(c.owner[i]===p && b.owner[i]!==p && !s.water[i] && !c.crater[i]){ const pv=b.owner[i]; byPrev[pv]=(byPrev[pv]||0)+1; } }
+  const caps=[];
+  for(const k in byPrev){ const pv=+k, n=byPrev[k]; caps.push(pv<0?('claimed '+jplural(n,'neutral holding')):('seized '+jplural(n,'land')+' from '+s.players[pv].name)); }
+  if(caps.length) lines.push(jcap(name+' '+jlist(caps)+'.'));
+  // nukes fired during march
+  const fired=b.nukes-c.nukes;
+  if(fired>0){
+    let newCr=0, victim=-9;
+    for(let i=0;i<s.N;i++){ if(c.crater[i] && !b.crater[i]){ newCr++; if(b.owner[i]>=0) victim=b.owner[i]; } }
+    if(newCr>0) lines.push(jcap(name+' launched '+jplural(fired,'nuke')+', scorching '+(victim>=0?s.players[victim].name+"'s land":'open ground')+'.'));
+    else lines.push(jcap(name+' launched '+jplural(fired,'nuke')+', '+(fired===1?'but it was stopped':'but they were stopped')+'.'));
+  }
+  if(fort) lines.push(name+' regrouped its forces.');
+  if(!lines.length) lines.push(name+' held position.');
+  return lines;
+}
 function takeTurn(s){
-  const p=s.turn; if(!s.players[p].alive){ E.endTurn(s); return; }
-  buildTurn(s,p); E.endPhase(s);      // -> march
-  marchTurn(s,p);  E.endPhase(s);     // -> maneuver
-  if(s.winner!==null) return;
-  maneuverTurn(s,p); E.endPhase(s);   // -> endTurn (next player, upkeep)
+  const p=s.turn; if(!s.players[p].alive){ E.endTurn(s); return [s.players[p].name+' has fallen.']; }
+  const name=s.players[p].name;
+  const a=snapshot(s,p);
+  buildTurn(s,p);
+  const b=snapshot(s,p); E.endPhase(s);
+  marchTurn(s,p);
+  const c=snapshot(s,p); E.endPhase(s);
+  let fort=false;
+  if(s.winner===null && !s.ended){ maneuverTurn(s,p); fort=s.fortifyUsed; E.endPhase(s); }
+  return narrate(s,p,name,a,b,c,fort);
 }
 
 root.FiefAI={ buildTurn, marchTurn, maneuverTurn, takeTurn, DIFF };
@@ -894,7 +1010,7 @@ function startGame(){
   var seed=(Date.now()^(Math.random()*1e9))>>>0;
   world=generateWorld(seed, mapTarget(total));
   S=E.newGame(world, cfg.h, cfg.a, cfg.d);
-  LOG=[];
+  LOG=[]; tut={on:false,shown:{}};
   enterGame();
   save();
   routeTurn(true);
@@ -904,6 +1020,7 @@ function resumeGame(){
     var raw=localStorage.getItem(SAVE); if(!raw)return;
     var data=JSON.parse(raw);
     if(data && data.v===2){ S=data.s; LOG=data.log||[]; } else { S=data; LOG=[]; }
+    if(!S.market) S.market={ crops:C.MKT_BASE.crops, steel:C.MKT_BASE.steel, gas:C.MKT_BASE.gas };
     world=S;
     cfg.h=S.players.filter(function(p){return !p.isAI;}).length;
     enterGame(); routeTurn(true);
@@ -938,6 +1055,10 @@ function beginHumanTurn(){
     var u=S.players[S.turn]._upkeep;
     if(u){ var m=[]; if(u.cropGain)m.push('+'+u.cropGain+' crops'); if(u.starved)m.push(u.starved+' starved'); toast('Court of '+S.players[S.turn].name+(m.length?': '+m.join(', '):'')); }
   }
+  if(tut.on){
+    if(tut.shown.maneuver){ coach('done'); tut.on=false; }
+    else coach('court');
+  }
 }
 function showPass(p){
   var pl=S.players[p];
@@ -948,23 +1069,39 @@ function showPass(p){
   document.getElementById('pass').classList.add('on');
 }
 
+var aiRunning=false, aiSkip=null;
 function runAITurn(){
   var p=S.turn, pl=S.players[p];
-  document.getElementById('hint').innerHTML='<b>'+pl.name+'</b> is scheming...';
-  var before=S.owner.slice(); var detBefore=S.detonations;
-  setTimeout(function(){
-    AI.takeTurn(S);
-    var gained=0;
-    for(var i=0;i<S.N;i++){ if(before[i]!==p && S.owner[i]===p) gained++; }
-    var msgs=[];
-    if(gained)msgs.push('took '+gained+' land'+(gained>1?'s':''));
-    if(S.detonations>detBefore){ var nn=S.detonations-detBefore; msgs.push('launched '+nn+' nuke'+(nn>1?'s':'')); }
-    pushLog(pl.name+(msgs.length?' '+msgs.join(', '):' held position')+'.', gained>0||S.detonations>detBefore);
-    render(); save();
+  aiRunning=true;
+  var journal = AI.takeTurn(S);
+  render();
+  showAIPlay(pl, journal, function(){
+    aiRunning=false; save();
     if(S.ended==='nuclear_winter'){ showNuclearWinter(); return; }
     if(S.winner!==null){ showVictory(); return; }
     routeTurn();
-  }, 620);
+  });
+}
+function showAIPlay(pl, lines, done){
+  var panel=document.getElementById('aiplay');
+  panel.innerHTML='<div class="aip-head"><span class="aip-dot" style="background:'+pl.color+'"></span><span class="aip-name">'+pl.name+'</span><span class="aip-turn">Round '+S.round+' &middot; tap to skip</span></div><div class="aip-lines" id="aipLines"></div>';
+  panel.classList.add('on');
+  var lc=document.getElementById('aipLines');
+  var i=0, timers=[], finished=false;
+  function addLine(t){ var d=document.createElement('div'); d.className='aip-line'; d.textContent=t; lc.appendChild(d); void d.offsetWidth; d.classList.add('show'); }
+  function step(){
+    if(i>=lines.length){ timers.push(setTimeout(finish, 750)); return; }
+    addLine(lines[i]); i++; timers.push(setTimeout(step, 730));
+  }
+  function finish(){
+    if(finished)return; finished=true; timers.forEach(clearTimeout);
+    pushLog(pl.name+': '+lines.join(' '), lines.length>1 || /seized|claimed|nuke|scorch/i.test(lines.join(' ')));
+    panel.classList.remove('on'); panel.onclick=null; aiSkip=null; done();
+  }
+  aiSkip=function(){ timers.forEach(clearTimeout); while(i<lines.length){ addLine(lines[i]); i++; } timers.push(setTimeout(finish, 300)); };
+  panel.onclick=function(){ if(aiSkip) aiSkip(); };
+  step();
+  if(tut.on) coach('ai');
 }
 
 /* ---- rendering ---- */
@@ -1064,6 +1201,7 @@ function isTarget(i){
 }
 
 function onTapCell(i){
+  if(aiRunning) return;
   var p=S.turn;
   if(S.water[i]){ return; }
   if(S.crater[i]){ toast('Scorched ground. Nothing can hold it.'); return; }
@@ -1094,6 +1232,7 @@ function here(i){ return 'a '+ (S.build[i]||'holding'); }
 /* ---- phase bar ---- */
 function renderPhaseBar(){
   var p=S.turn, pl=S.players[p], bar=document.getElementById('phaseBtns'), hint=document.getElementById('hint');
+  if(aiRunning || S.players[p].isAI){ hint.innerHTML='<b>'+pl.name+'</b> takes the field...'; bar.innerHTML=''; return; }
   var h='';
   if(S.phase==='build'){
     hint.innerHTML=S.reinf>0?('Place your <b>'+S.reinf+'</b> muster, set your lands, then march.'):'Set your lands, raise arms, then march.';
@@ -1113,12 +1252,14 @@ function renderPhaseBar(){
   bar.innerHTML=h;
 }
 function advance(){
+  if(aiRunning) return;
   if(S.phase==='maneuver'){
     E.endPhase(S); save();
     if(S.winner!==null){ showVictory(); return; }
     routeTurn();
   } else {
     E.endPhase(S); sel=-1; atkFrom=-1; nukeFrom=-1; uimode=''; render();
+    if(tut.on){ if(S.phase==='march') coach('march'); else if(S.phase==='maneuver') coach('maneuver'); }
   }
 }
 
@@ -1178,32 +1319,40 @@ function doMfg(kind){
   toast(r.success?('A '+kind+' is ready.'):('The '+kind+' failed on the bench. Steel spent.'));
   save(); openArsenal(); render();
 }
+function fmtP(x){ return x<1 ? x.toFixed(2) : x.toFixed(1); }
+function trendMark(k){ var base=C.MKT_BASE[k], p=S.market[k]; if(p>base*1.06)return ' <span style="color:var(--good)">&uarr;</span>'; if(p<base*0.94)return ' <span style="color:var(--ember)">&darr;</span>'; return ''; }
 function openMarket(){
   var pl=S.players[S.turn];
   function row(k,name,color){
-    var price=C.SELL[k]; var amt=Math.round(pl[k]);
-    var h='<div class="mkt-row"><span class="mk-i" style="background:'+color+'"></span><span class="mk-n">'+name+'<small>'+priceLabel(k)+'</small></span><span class="mk-a">'+amt+'</span></div>';
-    h+='<div class="mkt-sell">';
-    [10,25,'half','all'].forEach(function(q){ h+='<button onclick="doSell(\''+k+'\',\''+q+'\')">'+(q==='half'?'Half':q==='all'?'All':q)+'</button>'; });
+    var sp=E.sellUnit(S,k), bp=E.buyUnit(S,k), have=Math.floor(pl[k]);
+    var h='<div class="mkt-row"><span class="mk-i" style="background:'+color+'"></span>';
+    h+='<span class="mk-n">'+name+trendMark(k)+'<small>sell '+fmtP(sp)+' &middot; buy '+fmtP(bp)+' coin/unit</small></span>';
+    h+='<span class="mk-a">'+have+'</span></div>';
+    h+='<div class="mkt-sell"><span class="mkt-tag">Sell</span>';
+    [10,50,'half','all'].forEach(function(q){ h+='<button onclick="doSell(\''+k+'\',\''+q+'\')">'+(q==='half'?'Half':q==='all'?'All':q)+'</button>'; });
+    h+='</div>';
+    h+='<div class="mkt-buy"><span class="mkt-tag">Buy</span>';
+    [10,50,'max'].forEach(function(q){ h+='<button onclick="doBuy(\''+k+'\',\''+q+'\')">'+(q==='max'?'Max':q)+'</button>'; });
     h+='</div>';
     return h;
   }
-  var body='<h2>Open Market</h2><p class="msub">Sell surplus for coin. Prices are fixed by the market.</p>';
+  var body='<h2>Open Market</h2><p class="msub">Prices move with supply and demand. Selling drops a price, buying lifts it, and the market keeps a spread.</p>';
   body+=row('crops','Crops','var(--crop)')+row('steel','Steel','var(--steel)')+row('gas','Gas','var(--gas)');
   body+='<div class="mkt-row" style="margin-top:10px"><span class="mk-i" style="background:#e8b45f"></span><span class="mk-n">Treasury</span><span class="mk-a">'+pl.coin+' coin</span></div>';
   body+='<div class="mbtns" style="margin-top:12px"><button class="mbtn primary" onclick="closeModal()">Done</button></div>';
   showModal(body);
 }
-function priceLabel(k){
-  if(k==='crops')return '1 coin / 4 units';
-  if(k==='steel')return '3 coin / unit';
-  return '1 coin / 5 units';
-}
 function doSell(k,q){
   var pl=S.players[S.turn]; var units;
-  if(q==='all')units=pl[k]; else if(q==='half')units=Math.floor(pl[k]/2); else units=Math.min(parseInt(q,10),pl[k]);
+  if(q==='all')units=pl[k]; else if(q==='half')units=Math.floor(pl[k]/2); else units=parseInt(q,10);
   var r=E.sell(S,S.turn,k,units); if(!r.ok){toast(r.msg);return;}
   toast('Sold '+r.units+' '+k+' for '+r.coin+' coin.'); save(); openMarket(); render();
+}
+function doBuy(k,q){
+  var pl=S.players[S.turn]; var units;
+  if(q==='max')units=Math.floor(pl.coin/E.buyUnit(S,k)); else units=parseInt(q,10);
+  var r=E.buy(S,S.turn,k,units); if(!r.ok){toast(r.msg);return;}
+  toast('Bought '+r.units+' '+k+' for '+r.cost+' coin.'); save(); openMarket(); render();
 }
 
 /* ---- attack modal (dice) ---- */
@@ -1358,6 +1507,7 @@ function renderDrawer(){
   });
   h+='<div class="std-title">Chronicle</div><ul class="log" id="logList"></ul>';
   if(isHuman(S.turn)) h+='<div style="margin-top:16px"><button class="mbtn" style="width:100%;color:var(--ember);border-color:rgba(216,97,58,.4)" onclick="confirmConcede()">Concede this house</button></div>';
+  h+='<div style="margin-top:8px"><button class="mbtn" style="width:100%" onclick="closeDrawer();openHelp()">How to play</button></div>';
   h+='<div style="margin-top:8px"><button class="mbtn" style="width:100%" onclick="quitToMenu()">Save &amp; quit to menu</button></div>';
   document.getElementById('drawerBody').innerHTML=h;
   renderLogList();
@@ -1420,6 +1570,49 @@ function showNuclearWinter(){
   try{ localStorage.removeItem(SAVE); }catch(e){}
   showModal(body);
 }
+
+/* ---- help + tutorial ---- */
+var tut={on:false, shown:{}};
+function openHelp(){
+  function sec(color,title,text){ return '<div class="help-sec"><div class="help-h">'+(color?'<span class="hi" style="background:'+color+'"></span>':'')+title+'</div><p class="help-p">'+text+'</p></div>'; }
+  var b='<h2>How to Play</h2><p class="msub">Rule a realm of land and sea. Outlast every rival house.</p>';
+  b+=sec('','The goal','Conquer the map. You win when yours is the last house left standing. If more than five nukes ever detonate, nuclear winter ends the game and everyone loses.');
+  b+=sec('var(--brass-bright)','Your turn: three phases','Every turn runs <b>Court</b>, then <b>March</b>, then <b>Maneuver</b>. Use the button on the right of the action bar to move to the next phase.');
+  b+=sec('','Court','Income arrives first. Tap one of your lands to make it a <b>farm</b>, <b>steel mill</b>, or <b>refinery</b>, to <b>hire</b> troops for coin, and to build launchers or interceptors. Place your free <b>muster</b> troops on the lands that need them, and visit the Shipyard, Arsenal, and Market.');
+  b+=sec('','March','Tap one of your lands holding two or more troops, then tap a bordering enemy or neutral land to attack. Combat is decided by dice: roll once or blitz. If you break the defenders, your troops take the land.');
+  b+=sec('','Maneuver','Make one move of troops between two connected lands to shore up a border, then end your turn.');
+  b+=sec('var(--crop)','Resources and feeding','Farms give <b>crops</b>, mills give <b>steel</b>, refineries give <b>gas</b>, and every land pays <b>coin</b> in tax. Each troop eats one crop per turn. If you cannot feed them all, the unfed troops risk deserting, so keep your farms ahead of your army.');
+  b+=sec('#e8b45f','The market','Prices move with supply and demand on one shared market. <b>Selling</b> drops a price, <b>buying</b> lifts it, and a spread means round trips lose a little. Prices drift back toward normal over a few turns. Sell surplus crops for coin, or buy the steel and gas you need to build and fight.');
+  b+=sec('#7fbfe0','Ships and the sea','Water is crossable only by ship. Build ships in the Shipyard while you hold a coastal land. Each ship carries up to ten troops, so a big army sails as several ships in one invasion. In March, attack an across-water coast from your own coast; in Maneuver, ferry troops between your coasts.');
+  b+=sec('var(--ember)','Arms and nukes','Forge a <b>launcher</b> to fire from and an <b>interceptor</b> to defend. A fired nuke hits an undefended target two times in three. The defender may fire a salvo of <b>rockets</b>, declared all at once, each with a two-in-three chance to shoot it down. A hit leaves a permanent crater no one can ever hold.');
+  b+=sec('','Concede and save','A human player may concede from the menu at any time. An AI never will. Games save automatically, so you can quit to the menu and resume the campaign later.');
+  b+='<div class="mbtns" style="margin-top:14px"><button class="mbtn primary" onclick="closeModal()">Close</button></div>';
+  showModal(b);
+}
+
+function startTutorial(){
+  cfg.h=1; cfg.a=1; cfg.d='squire';
+  var seed=(Date.now()^(Math.random()*1e9))>>>0;
+  world=generateWorld(seed, 50);
+  S=E.newGame(world, 1, 1, 'squire');
+  LOG=[]; tut={on:true, shown:{}};
+  enterGame(); save(); routeTurn(true);
+}
+var COACH_TEXT={
+  court:'Welcome, my liege. This is your <b>Court</b>. First you gather income, then you build and muster. Tap one of your lands to set it to a farm, mill, or refinery, to hire troops, or to place your free muster. Farms feed your army, so start there. When you are ready, tap <b>March</b>.',
+  march:'Now you <b>March</b>. Tap one of your lands that holds two or more troops, then tap a bordering enemy or neutral land to attack. The dice decide it. Take a lightly held neutral land to grow. Tap <b>Maneuver</b> when you are done.',
+  maneuver:'Last is <b>Maneuver</b>. You may make one move of troops between two connected lands to strengthen a border. Then tap <b>End Turn</b> to hand the field to your rival.',
+  ai:'Your rival is taking its turn. This panel narrates each move it makes, and everything is also kept in the <b>Chronicle</b> under the menu. Tap the panel to skip ahead.',
+  done:'You have the rhythm now: <b>Court</b>, <b>March</b>, <b>Maneuver</b>, and repeat until one house stands alone. You are on your own from here. The <b>How to play</b> guide is always in the menu. Good luck.'
+};
+function coach(key){
+  if(!tut.on || tut.shown[key]) return;
+  tut.shown[key]=true;
+  var c=document.getElementById('coach');
+  c.innerHTML='<div class="coach-head"><span class="coach-badge">Tutorial</span></div><div class="coach-text">'+COACH_TEXT[key]+'</div><button class="coach-btn" onclick="dismissCoach()">Got it</button>';
+  c.classList.add('on'); document.body.classList.add('coach-live');
+}
+function dismissCoach(){ document.getElementById('coach').classList.remove('on'); document.body.classList.remove('coach-live'); }
 
 /* init */
 (function init(){ document.getElementById('resumeBtn').style.display=hasSave()?'block':'none'; adjP('h',0); })();
