@@ -175,6 +175,10 @@
   .aip-line{font-size:12.5px;line-height:1.4;color:var(--muted);padding-left:14px;position:relative;opacity:0;transform:translateY(5px);transition:opacity .3s,transform .3s}
   .aip-line.show{opacity:1;transform:translateY(0)}
   .aip-line::before{content:"";position:absolute;left:2px;top:7px;width:5px;height:5px;border-radius:50%;background:var(--brass)}
+  .maparea.shake{animation:mapshake .5s cubic-bezier(.36,.07,.19,.97)}
+  @keyframes mapshake{10%{transform:translate(-3px,2px)}20%{transform:translate(4px,-3px)}30%{transform:translate(-5px,1px)}40%{transform:translate(4px,3px)}50%{transform:translate(-3px,-2px)}60%{transform:translate(3px,2px)}70%{transform:translate(-2px,-1px)}80%{transform:translate(2px,1px)}90%{transform:translate(-1px,0)}100%{transform:translate(0,0)}}
+  .nukeflash{position:fixed;inset:0;z-index:59;background:radial-gradient(circle at 50% 45%,rgba(255,240,210,.9),rgba(255,180,90,.4) 45%,transparent 72%);opacity:0;pointer-events:none;transition:opacity .05s}
+  .nukeflash.on{opacity:1;transition:opacity .04s}
   .setup-links{display:flex;align-items:center;justify-content:center;gap:14px;margin-top:14px}
   .setup-links button{background:none;border:none;color:var(--brass-bright);font-weight:600;font-size:13px;letter-spacing:.3px;padding:4px 2px}
   .setup-links button:hover{text-decoration:underline}
@@ -315,6 +319,7 @@
   <button onclick="beginHumanTurn()">I AM READY</button>
 </div>
 <div class="toast" id="toast"></div>
+<div class="nukeflash" id="nukeflash"></div>
 
 <script>// ---- Fiefdom II world generator: Voronoi territories, oceans, coasts, sea routes ----
 function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;var t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
@@ -421,6 +426,19 @@ function generateWorld(seed, targetCells){
   for(const i of landIdx){ for(const wc of touches[i]){ (byComp[wc]=byComp[wc]||[]).push(i); } }
   for(const wc in byComp){ const arr=byComp[wc]; for(let a=0;a<arr.length;a++)for(let b=a+1;b<arr.length;b++){ seaAdj[arr[a]].add(arr[b]); seaAdj[arr[b]].add(arr[a]); } }
 
+  // sea distance: water-hop count between coastal lands (BFS through water cells)
+  const seaDist={};
+  for(const i of landIdx){
+    if(!coast[i]) continue;
+    const distW=new Array(N).fill(-1); const q=[];
+    for(const w of adj[i]){ if(water[w] && distW[w]<0){ distW[w]=1; q.push(w); } }
+    let head=0;
+    while(head<q.length){ const u=q[head++]; for(const v of adj[u]){ if(water[v] && distW[v]<0){ distW[v]=distW[u]+1; q.push(v); } } }
+    const dmap={};
+    for(const j of landIdx){ if(j===i||!coast[j]) continue; let best=Infinity; for(const w of adj[j]){ if(water[w] && distW[w]>0) best=Math.min(best, distW[w]); } if(best<Infinity) dmap[j]=best; }
+    seaDist[i]=dmap;
+  }
+
   for(const i of landIdx){
     const landN=[...adj[i]].some(j=>!water[j]);
     const seaN=seaAdj[i].size>0;
@@ -431,7 +449,7 @@ function generateWorld(seed, targetCells){
     cells:cells.map(c=>c.map(p=>({x:+p.x.toFixed(1),y:+p.y.toFixed(1)}))),
     centroid:cx.map(c=>({x:+c.x.toFixed(1),y:+c.y.toFixed(1)})),
     water, coast,
-    adj:adj.map(s=>[...s]), seaAdj:seaAdj.map(s=>[...s]), comp};
+    adj:adj.map(s=>[...s]), seaAdj:seaAdj.map(s=>[...s]), seaDist, comp};
 }
 
 if(typeof module!=='undefined') module.exports={generateWorld};
@@ -443,7 +461,7 @@ if(typeof module!=='undefined') module.exports={generateWorld};
 const C = {
   CROP_MULT:4, STEEL_PER_MILL:2, GAS_PER_REFINERY:10,
   FEED_PER_TROOP:1, STARVE_CHANCE:1/3,
-  SHIP_STEEL:10, SHIP_CAP:10, SHIP_MOVE_GAS:10,
+  SHIP_STEEL:10, SHIP_CAP:10, SHIP_MOVE_GAS:10, GAS_PER_SEA_SPACE:4,
   LAUNCHER_STEEL:10, INTERCEPTOR_STEEL:10,
   NUKE_FIRST_STEEL:20, NUKE_FIRST_PROB:0.5, NUKE_NEXT_STEEL:10,
   ROCKET_FIRST_STEEL:20, ROCKET_FIRST_PROB:0.5, ROCKET_NEXT_STEEL:10,
@@ -472,7 +490,7 @@ function newGame(world, humans, ais, difficulty){
   const s={
     W:world.W,H:world.H,N:world.N,
     cells:world.cells, centroid:world.centroid, water:world.water, coast:world.coast,
-    adj:world.adj, seaAdj:world.seaAdj,
+    adj:world.adj, seaAdj:world.seaAdj, seaDist:world.seaDist||{},
     owner:new Array(world.N).fill(-1),
     troops:new Array(world.N).fill(0),
     build:new Array(world.N).fill(''),
@@ -490,20 +508,44 @@ function newGame(world, humans, ais, difficulty){
       alive:true, coin:24, crops:20, steel:10, gas:20, ships:0, nukes:0, rockets:0 });
   }
   const landIdx=[]; for(let i=0;i<s.N;i++) if(!s.water[i]) landIdx.push(i);
-  const starts=[]; const first=landIdx[Math.floor(rng(s)*landIdx.length)]; starts.push(first);
-  while(starts.length<totalP){
-    let best=-1,bestD=-1;
-    for(const i of landIdx){ if(starts.includes(i))continue; let md=1e9; for(const st of starts) md=Math.min(md,dist(s,i,st)); if(md>bestD){bestD=md;best=i;} }
-    starts.push(best);
-  }
-  const clusterSize=Math.max(2, Math.min(4, Math.floor(landIdx.length/(totalP*2.4))+2));
-  for(let p=0;p<totalP;p++){
-    const q=[starts[p]]; let placed=0; s.owner[starts[p]]=p; s.troops[starts[p]]=5; placed++;
-    while(q.length && placed<clusterSize){
-      const u=q.shift(); const ns=s.adj[u].filter(v=>!s.water[v]&&s.owner[v]<0); shuffle(s,ns);
-      for(const v of ns){ if(placed>=clusterSize)break; if(s.owner[v]<0){ s.owner[v]=p; s.troops[v]=3; placed++; q.push(v);} }
+  // connected land components (via land adjacency)
+  const compId=new Array(s.N).fill(-1); const compSize=[];
+  for(const i of landIdx){ if(compId[i]<0){ const id=compSize.length; const stack=[i]; compId[i]=id; let n=0; while(stack.length){ const u=stack.pop(); n++; for(const v of s.adj[u]){ if(!s.water[v]&&compId[v]<0){ compId[v]=id; stack.push(v);} } } compSize.push(n); } }
+  // attempt a fair, equal-size seeding for a given cluster size
+  function trySeed(cs, firstPick){
+    const eligible=landIdx.filter(i=>compSize[compId[i]]>=cs);
+    if(eligible.length<totalP) return null;
+    const starts=[firstPick];
+    while(starts.length<totalP){
+      let best=-1,bd=-1;
+      for(const i of eligible){ if(starts.includes(i))continue; let md=1e9; for(const st of starts) md=Math.min(md,dist(s,i,st)); if(md>bd){bd=md;best=i;} }
+      if(best<0) return null; starts.push(best);
     }
+    const own=new Array(s.N).fill(-1); const cnt=new Array(totalP).fill(0);
+    for(let p=0;p<totalP;p++){ own[starts[p]]=p; cnt[p]=1; }
+    let guard=0, need=cs*totalP;
+    while(cnt.some(c=>c<cs) && guard++<need*6){
+      let progressed=false;
+      for(let p=0;p<totalP;p++){ if(cnt[p]>=cs) continue;
+        let pick=-1;
+        for(let i=0;i<s.N && pick<0;i++){ if(own[i]===p){ const ns=s.adj[i].filter(v=>!s.water[v]&&own[v]<0); if(ns.length){ shuffle(s,ns); pick=ns[0]; } } }
+        if(pick>=0){ own[pick]=p; cnt[p]++; progressed=true; }
+      }
+      if(!progressed) break;
+    }
+    return cnt.every(c=>c===cs) ? {own,starts} : null;
   }
+  let clusterSize=Math.max(2, Math.min(4, Math.floor(landIdx.length/(totalP*2.4))+2));
+  let seed=null;
+  while(clusterSize>=1 && !seed){
+    const elig=landIdx.filter(i=>compSize[compId[i]]>=clusterSize);
+    const tries=Math.max(1, Math.min(24, elig.length));
+    for(let a=0;a<tries && !seed;a++){ const fp=elig[Math.floor(rng(s)*elig.length)]; if(fp===undefined)break; seed=trySeed(clusterSize, fp); }
+    if(!seed) clusterSize--;
+  }
+  if(!seed){ const st=landIdx.slice(0,totalP); const own=new Array(s.N).fill(-1); st.forEach((c,p)=>own[c]=p); seed={own,starts:st}; clusterSize=1; }
+  s.startLands=clusterSize;
+  for(let i=0;i<s.N;i++){ if(seed.own[i]>=0){ s.owner[i]=seed.own[i]; s.troops[i]= seed.starts.indexOf(i)>=0?5:3; } }
   for(const i of landIdx){ if(s.owner[i]<0){ s.owner[i]=-1; s.troops[i]=1+Math.floor(rng(s)*3); } }
   for(let p=0;p<totalP;p++){
     const owned=landIdx.filter(i=>s.owner[i]===p);
@@ -636,6 +678,8 @@ function landAttack(s,p,from,to,commit,blitz){
   if(pl.gas<gasCost) return {ok:false,msg:'Need '+gasCost+' gas'};
   pl.gas-=gasCost; return _attack(s,p,from,to,commit,blitz,false);
 }
+function seaDistance(s,from,to){ const m=s.seaDist&&s.seaDist[from]; const d=m&&m[to]; return (d&&d>0)?d:2; }
+function navalGasCost(s,from,to,commit){ const shipsNeeded=Math.max(1,Math.ceil(commit/C.SHIP_CAP)); return shipsNeeded*seaDistance(s,from,to)*C.GAS_PER_SEA_SPACE; }
 function navalAttack(s,p,from,to,commit,blitz){
   if(s.owner[from]!==p||!s.coast[from]) return {ok:false,msg:'Origin not coastal'};
   if(!s.seaAdj[from].includes(to)) return {ok:false,msg:'No sea route'};
@@ -646,7 +690,7 @@ function navalAttack(s,p,from,to,commit,blitz){
   commit=Math.min(commit,s.troops[from]-1,C.SHIP_CAP*avail);
   if(commit<1) return {ok:false,msg:'Need troops to embark'};
   const shipsNeeded=Math.ceil(commit/C.SHIP_CAP);
-  const gasCost=shipsNeeded*C.SHIP_MOVE_GAS;
+  const gasCost=navalGasCost(s,from,to,commit);
   if(pl.gas<gasCost) return {ok:false,msg:'Need '+gasCost+' gas'};
   pl.gas-=gasCost; s.shipsUsed+=shipsNeeded; return _attack(s,p,from,to,commit,blitz,true);
 }
@@ -674,7 +718,7 @@ function fortify(s,p,from,to,n){
   n=Math.min(n,s.troops[from]-1); if(n<1) return {ok:false,msg:'Nothing to move'};
   const pl=s.players[p]; const bySea=!landConn;
   const shipsNeeded=bySea?Math.ceil(n/C.SHIP_CAP):0;
-  const gasCost=bySea?shipsNeeded*C.SHIP_MOVE_GAS:n*C.MARCH_GAS_PER_TROOP;
+  const gasCost=bySea?navalGasCost(s,from,to,n):n*C.MARCH_GAS_PER_TROOP;
   if(bySea && (pl.ships-s.shipsUsed)<shipsNeeded) return {ok:false,msg:'Not enough ships'};
   if(pl.gas<gasCost) return {ok:false,msg:'Need '+gasCost+' gas'};
   pl.gas-=gasCost; if(bySea)s.shipsUsed+=shipsNeeded; s.troops[from]-=n; s.troops[to]+=n; s.fortifyUsed=true;
@@ -755,7 +799,7 @@ function E_ownedCount(s,p){ let n=0; for(let i=0;i<s.N;i++) if(s.owner[i]===p&&!
 
 root.FiefEngine={ C, newGame, beginTurn, runUpkeep, ownedLands, countBuild, totalTroops, hasCoastalLand,
   landNeighbors, reinforcements, setBuilding, buildShip, buildAsset, manufacture, sell, hire, placeReinf,
-  resolveCombat, landAttack, navalAttack, fortify, fireNuke, hasInterceptor, maxDefenseRockets, defenderAutoRockets, occupiableCount, concede, buy, sellUnit, buyUnit, marketDrift, endPhase, endTurn, checkWinner, dist };
+  resolveCombat, landAttack, navalAttack, fortify, fireNuke, hasInterceptor, maxDefenseRockets, defenderAutoRockets, occupiableCount, concede, buy, sellUnit, buyUnit, marketDrift, seaDistance, navalGasCost, endPhase, endTurn, checkWinner, dist };
 
 })(typeof module!=='undefined'?module.exports:(this.window=this.window||this));
 </script>
@@ -866,12 +910,13 @@ function bestAttack(s,p,cfg){
       const ratio=(s.troops[from]-1)/Math.max(1,s.troops[to]);
       if(ratio>=thr){ const score=ratio + (s.owner[to]<0?0.3:0.0); if(!best||score>best.score) best={from,to,naval:false,score}; }
     }
-    if(s.coast[from] && avail>0 && pl.gas>=C.SHIP_MOVE_GAS){
+    if(s.coast[from] && avail>0 && pl.gas>=C.GAS_PER_SEA_SPACE){
       const cap=Math.min(s.troops[from]-1, C.SHIP_CAP*avail);
       for(const to of s.seaAdj[from]){
         if(s.owner[to]===p||s.crater[to]) continue;
+        if(pl.gas < E.navalGasCost(s,from,to,cap)) continue;
         const ratio=cap/Math.max(1,s.troops[to]);
-        if(cap>=1 && ratio>=thr){ const score=ratio-0.12 + (s.owner[to]<0?0.3:0); if(!best||score>best.score) best={from,to,naval:true,commit:cap,score}; }
+        if(cap>=1 && ratio>=thr){ const score=ratio-0.12-0.03*E.seaDistance(s,from,to) + (s.owner[to]<0?0.3:0); if(!best||score>best.score) best={from,to,naval:true,commit:cap,score}; }
       }
     }
   }
@@ -897,7 +942,13 @@ function marchTurn(s,p){
     if(lnc!==undefined){
       let tgt=-1,tb=6;
       for(let i=0;i<s.N;i++){ if(!s.water[i]&&!s.crater[i]&&s.owner[i]>=0&&s.owner[i]!==p&&s.troops[i]>tb){ tb=s.troops[i]; tgt=i; } }
-      if(tgt>=0){ const rk=E.defenderAutoRockets(s, s.owner[tgt]); E.fireNuke(s,p,lnc,tgt,rk); }
+      if(tgt>=0){
+        const victim=s.owner[tgt];
+        const rk=E.defenderAutoRockets(s, victim);
+        let dInt=-1; if(victim>=0){ for(const L of E.ownedLands(s,victim)){ if(s.interceptor[L]){ dInt=L; break; } } }
+        const res=E.fireNuke(s,p,lnc,tgt,rk);
+        if(res.ok && s._aiNukes) s._aiNukes.push({from:lnc,target:tgt,defInt:dInt,outcome:res.outcome,fired:rk});
+      }
     }
   }
 }
@@ -927,6 +978,7 @@ function snapshot(s,p){
     coin:s.players[p].coin, crops:s.players[p].crops, steel:s.players[p].steel, gas:s.players[p].gas,
     farm:E.countBuild(s,p,'farm'), mill:E.countBuild(s,p,'mill'), refinery:E.countBuild(s,p,'refinery'),
     launch:owned.filter(i=>s.launcher[i]).length, intc:owned.filter(i=>s.interceptor[i]).length,
+    reinf:s.reinf||0,
     owner:s.owner.slice(), crater:s.crater.slice()
   };
 }
@@ -945,7 +997,9 @@ function narrate(s,p,name,a,b,c,fort){
   if(b.nukes-a.nukes>0) eco.push('forged '+jplural(b.nukes-a.nukes,'nuke'));
   if(b.rockets-a.rockets>0) eco.push('forged '+jplural(b.rockets-a.rockets,'rocket'));
   if((a.crops-b.crops>5||a.steel-b.steel>2||a.gas-b.gas>5) && b.coin>a.coin) eco.push('sold surplus at market');
-  const muster=b.troops-a.troops; if(muster>0) eco.push('mustered '+jplural(muster,'troop'));
+  const gain=b.troops-a.troops, placed=Math.min(a.reinf||0,Math.max(0,gain)), hired=Math.max(0,gain-placed);
+  if(placed>0) eco.push('mustered '+jplural(placed,'troop'));
+  if(hired>0) eco.push('hired '+jplural(hired,'troop'));
   if(eco.length) lines.push(jcap(name+' '+jlist(eco)+'.'));
   // captures during march (b -> c owners)
   const byPrev={};
@@ -968,6 +1022,7 @@ function narrate(s,p,name,a,b,c,fort){
 function takeTurn(s){
   const p=s.turn; if(!s.players[p].alive){ E.endTurn(s); return [s.players[p].name+' has fallen.']; }
   const name=s.players[p].name;
+  s._aiNukes=[];
   const a=snapshot(s,p);
   buildTurn(s,p);
   const b=snapshot(s,p); E.endPhase(s);
@@ -1069,17 +1124,29 @@ function showPass(p){
   document.getElementById('pass').classList.add('on');
 }
 
-var aiRunning=false, aiSkip=null;
+var aiRunning=false, aiSkip=null, fxBusy=false;
 function runAITurn(){
   var p=S.turn, pl=S.players[p];
   aiRunning=true;
   var journal = AI.takeTurn(S);
+  var nukes = (S._aiNukes||[]).slice(); if(S._aiNukes) S._aiNukes.length=0;
   render();
-  showAIPlay(pl, journal, function(){
-    aiRunning=false; save();
-    if(S.ended==='nuclear_winter'){ showNuclearWinter(); return; }
-    if(S.winner!==null){ showVictory(); return; }
-    routeTurn();
+  var proceed=function(){
+    showAIPlay(pl, journal, function(){
+      aiRunning=false; save();
+      if(S.ended==='nuclear_winter'){ showNuclearWinter(); return; }
+      if(S.winner!==null){ showVictory(); return; }
+      routeTurn();
+    });
+  };
+  if(nukes.length){ fxBusy=true; playAINukes(nukes,0,function(){ fxBusy=false; proceed(); }); }
+  else proceed();
+}
+function playAINukes(list,i,cb){
+  if(i>=list.length){ cb(); return; }
+  var ev=list[i];
+  playNukeFx(ev.from, ev.target, ev.defInt, ev.outcome, ev.fired||0, function(){
+    setTimeout(function(){ playAINukes(list,i+1,cb); }, 260);
   });
 }
 function showAIPlay(pl, lines, done){
@@ -1090,8 +1157,8 @@ function showAIPlay(pl, lines, done){
   var i=0, timers=[], finished=false;
   function addLine(t){ var d=document.createElement('div'); d.className='aip-line'; d.textContent=t; lc.appendChild(d); void d.offsetWidth; d.classList.add('show'); }
   function step(){
-    if(i>=lines.length){ timers.push(setTimeout(finish, 750)); return; }
-    addLine(lines[i]); i++; timers.push(setTimeout(step, 730));
+    if(i>=lines.length){ timers.push(setTimeout(finish, 1100)); return; }
+    addLine(lines[i]); i++; timers.push(setTimeout(step, 1550));
   }
   function finish(){
     if(finished)return; finished=true; timers.forEach(clearTimeout);
@@ -1201,7 +1268,7 @@ function isTarget(i){
 }
 
 function onTapCell(i){
-  if(aiRunning) return;
+  if(aiRunning||fxBusy) return;
   var p=S.turn;
   if(S.water[i]){ return; }
   if(S.crater[i]){ toast('Scorched ground. Nothing can hold it.'); return; }
@@ -1252,7 +1319,7 @@ function renderPhaseBar(){
   bar.innerHTML=h;
 }
 function advance(){
-  if(aiRunning) return;
+  if(aiRunning||fxBusy) return;
   if(S.phase==='maneuver'){
     E.endPhase(S); save();
     if(S.winner!==null){ showVictory(); return; }
@@ -1329,7 +1396,7 @@ function openMarket(){
     h+='<span class="mk-n">'+name+trendMark(k)+'<small>sell '+fmtP(sp)+' &middot; buy '+fmtP(bp)+' coin/unit</small></span>';
     h+='<span class="mk-a">'+have+'</span></div>';
     h+='<div class="mkt-sell"><span class="mkt-tag">Sell</span>';
-    [10,50,'half','all'].forEach(function(q){ h+='<button onclick="doSell(\''+k+'\',\''+q+'\')">'+(q==='half'?'Half':q==='all'?'All':q)+'</button>'; });
+    [1,10,50,'half','all'].forEach(function(q){ h+='<button onclick="doSell(\''+k+'\',\''+q+'\')">'+(q==='half'?'Half':q==='all'?'All':q)+'</button>'; });
     h+='</div>';
     h+='<div class="mkt-buy"><span class="mkt-tag">Buy</span>';
     [10,50,'max'].forEach(function(q){ h+='<button onclick="doBuy(\''+k+'\',\''+q+'\')">'+(q==='max'?'Max':q)+'</button>'; });
@@ -1377,9 +1444,9 @@ function drawAttack(){
 function atkControlsHTML(){
   var a=atkState, pl=S.players[S.turn];
   if(a.done){ return '<div class="mbtns"><button class="mbtn primary" onclick="closeModal();finishAtk()">Continue</button></div>'; }
-  var gas = a.naval ? Math.ceil(a.commit/C.SHIP_CAP)*C.SHIP_MOVE_GAS : a.commit*C.MARCH_GAS_PER_TROOP;
+  var gas = a.naval ? E.navalGasCost(S,a.from,a.to,a.commit) : a.commit*C.MARCH_GAS_PER_TROOP;
   var canRoll = pl.gas>=gas && a.commit>=1 && S.troops[a.from]>1;
-  var h='<div class="stepper"><button class="stepbtn" onclick="stepAtk(-1)">&minus;</button><div class="stepval">'+a.commit+'<small>'+(a.naval?'embark ('+gas+' gas)':'attack ('+gas+' gas)')+'</small></div><button class="stepbtn" onclick="stepAtk(1)">+</button></div>';
+  var h='<div class="stepper"><button class="stepbtn" onclick="stepAtk(-1)">&minus;</button><div class="stepval">'+a.commit+'<small>'+(a.naval?'embark &middot; '+E.seaDistance(S,a.from,a.to)+' spaces ('+gas+' gas)':'attack ('+gas+' gas)')+'</small></div><button class="stepbtn" onclick="stepAtk(1)">+</button></div>';
   h+='<div class="mbtns"><button class="mbtn" onclick="closeModal();cancelAtk()">Retreat</button><button class="mbtn" '+(canRoll?'':'disabled')+' onclick="runAtk(false)">Roll once</button><button class="mbtn primary" '+(canRoll?'':'disabled')+' onclick="runAtk(true)">Blitz</button></div>';
   return h;
 }
@@ -1429,7 +1496,7 @@ function openFortify(from,to){
 }
 function drawFortify(){
   var f=fortState;
-  var gas=f.naval?Math.ceil(f.n/C.SHIP_CAP)*C.SHIP_MOVE_GAS:f.n*C.MARCH_GAS_PER_TROOP;
+  var gas=f.naval?E.navalGasCost(S,f.from,f.to,f.n):f.n*C.MARCH_GAS_PER_TROOP;
   var body='<h2>Fortify</h2><p class="msub">'+(f.naval?'By sea':'By land')+' &middot; move troops to consolidate</p>';
   body+='<div class="stepper"><button class="stepbtn" onclick="stepFort(-1)">&minus;</button><div class="stepval">'+f.n+'<small>move ('+gas+' gas)</small></div><button class="stepbtn" onclick="stepFort(1)">+</button></div>';
   var pl=S.players[S.turn]; var can=pl.gas>=gas && f.n>=1;
@@ -1481,15 +1548,95 @@ function stepDef(x){ defState.n=Math.max(0,Math.min(defState.max,defState.n+x));
 function commitDefense(){ var d=defState; defState=null; resolveNuke(d.from,d.target,d.n); }
 function cancelNuke(){ uimode=''; nukeFrom=-1; render(); }
 function resolveNuke(from,target,rk){
-  var r=E.fireNuke(S,S.turn,from,target,rk); closeModal(); uimode=''; nukeFrom=-1;
+  closeModal();
+  var defId=S.owner[target];
+  var r=E.fireNuke(S,S.turn,from,target,rk); uimode=''; nukeFrom=-1;
   if(!r.ok){ toast(r.msg); render(); return; }
-  if(r.outcome==='intercepted'){ toast('Intercepted! '+r.intercepts+' rocket'+(r.intercepts>1?'s':'')+' knocked it down.'); pushLog(S.players[S.turn].name+"'s nuke was intercepted.",true); }
-  else if(r.outcome==='dud'){ toast('The warhead misfired. A dud.'); pushLog(S.players[S.turn].name+"'s nuke fizzled.",false); }
-  else if(r.outcome==='detonated'){ toast('Detonation. The land is scorched forever.'); pushLog(S.players[S.turn].name+' nuked a territory ('+r.detonations+'/'+C.WINTER_LIMIT+').',true); }
-  else if(r.outcome==='nuclear_winter'){ pushLog('Nuclear winter falls. The realm is ash.',true); save(); render(); showNuclearWinter(); return; }
-  save();
-  if(S.winner!==null){ showVictory(); return; }
-  render();
+  var defInt=-1;
+  if(defId>=0){ var dl=E.ownedLands(S,defId); for(var k=0;k<dl.length;k++){ if(S.interceptor[dl[k]]){ defInt=dl[k]; break; } } }
+  fxBusy=true;
+  playNukeFx(from, target, defInt, r.outcome, r.fired||0, function(){
+    fxBusy=false;
+    if(r.outcome==='intercepted'){ toast('Intercepted! '+r.intercepts+' rocket'+(r.intercepts>1?'s':'')+' knocked it down.'); pushLog(S.players[S.turn].name+"'s nuke was intercepted.",true); }
+    else if(r.outcome==='dud'){ toast('The warhead misfired. A dud.'); pushLog(S.players[S.turn].name+"'s nuke fizzled.",false); }
+    else if(r.outcome==='detonated'){ toast('Detonation. The land is scorched forever.'); pushLog(S.players[S.turn].name+' nuked a territory ('+r.detonations+'/'+C.WINTER_LIMIT+').',true); }
+    else if(r.outcome==='nuclear_winter'){ pushLog('Nuclear winter falls. The realm is ash.',true); save(); render(); showNuclearWinter(); return; }
+    save();
+    if(S.winner!==null){ render(); showVictory(); return; }
+    render();
+  });
+}
+
+/* ---- nuke FX ---- */
+function svgEl(tag,attrs){ var e=document.createElementNS('http://www.w3.org/2000/svg',tag); for(var k in attrs) e.setAttribute(k,attrs[k]); return e; }
+function fxAnimate(dur,onFrame,onDone){ var st=null; function fr(ts){ if(st===null)st=ts; var t=Math.min(1,(ts-st)/dur); onFrame(t); if(t<1)requestAnimationFrame(fr); else if(onDone)onDone(); } requestAnimationFrame(fr); }
+function fxBez(A,C,B,t){ var u=1-t; return {x:u*u*A.x+2*u*t*C.x+t*t*B.x, y:u*u*A.y+2*u*t*C.y+t*t*B.y}; }
+function cleanupFx(){ var g=document.getElementById('nukefx'); if(g&&g.parentNode) g.parentNode.removeChild(g); }
+function nukeFlash(){ var f=document.getElementById('nukeflash'); if(!f)return; f.classList.add('on'); setTimeout(function(){f.classList.remove('on');},240); }
+function playNukeFx(fromI,targetI,defIntI,outcome,fired,done){
+  var m=document.getElementById('map'); var A=S.centroid[fromI], T=S.centroid[targetI];
+  if(!m||!A||!T){ done(); return; }
+  var g=svgEl('g',{id:'nukefx'}); m.appendChild(g);
+  var intercepted = outcome==='intercepted';
+  var dx=T.x-A.x, dy=T.y-A.y, distp=Math.hypot(dx,dy);
+  var apex=Math.min(240, 80+distp*0.4);
+  var endF = intercepted ? 0.6 : 1.0;
+  var END={x:A.x+dx*endF, y:A.y+dy*endF};
+  var mid={x:(A.x+END.x)/2, y:(A.y+END.y)/2};
+  var Cp={x:mid.x, y:mid.y-apex};
+  var glow=svgEl('circle',{r:12,fill:'#e8b45f','fill-opacity':0.22}); g.appendChild(glow);
+  var missile=svgEl('circle',{r:5,fill:'#ffe4a6',stroke:'#e8b45f','stroke-width':2}); g.appendChild(missile);
+  var trail=[];
+  // interceptors
+  var rockets=[]; var D = (defIntI>=0)?S.centroid[defIntI]:null;
+  if(fired>0 && D){
+    var n=Math.min(fired,3);
+    for(var k=0;k<n;k++){
+      var el=svgEl('circle',{r:3.5,fill:'#cfebff',stroke:'#6ec0ff','stroke-width':1.5,'fill-opacity':0}); g.appendChild(el);
+      var off=(k-(n-1)/2)*26;
+      var aim = intercepted ? {x:END.x+off*0.3,y:END.y} : {x:mid.x+off, y:mid.y-apex*0.5};
+      rockets.push({el:el, aim:aim});
+    }
+  }
+  var FLIGHT=1050;
+  fxAnimate(FLIGHT,function(t){
+    var pos=fxBez(A,Cp,END,t);
+    missile.setAttribute('cx',pos.x); missile.setAttribute('cy',pos.y);
+    glow.setAttribute('cx',pos.x); glow.setAttribute('cy',pos.y);
+    if(t<0.98){ var d=svgEl('circle',{cx:pos.x,cy:pos.y,r:3,fill:'#e8b45f','fill-opacity':0.55}); g.appendChild(d); trail.push(d); }
+    for(var i=0;i<trail.length;i++){ var o=parseFloat(trail[i].getAttribute('fill-opacity')); trail[i].setAttribute('fill-opacity',Math.max(0,o-0.028)); }
+    for(var r=0;r<rockets.length;r++){ var rt=Math.max(0,Math.min(1,(t-0.15-r*0.05)/0.75)); var rk=rockets[r]; var rp={x:D.x+(rk.aim.x-D.x)*rt, y:D.y+(rk.aim.y-D.y)*rt}; rk.el.setAttribute('cx',rp.x); rk.el.setAttribute('cy',rp.y); rk.el.setAttribute('fill-opacity', intercepted?1:(rt<0.7?1:Math.max(0,1-(rt-0.7)/0.3))); }
+  },function(){
+    if(intercepted){ fxBurst(g,END,'#8fd0ff',80,function(){ cleanupFx(); done(); }); }
+    else if(outcome==='dud'){ fxFizzle(g,END,function(){ cleanupFx(); done(); }); }
+    else { fxBigBlast(g,END,function(){ cleanupFx(); done(); }); }
+  });
+}
+function fxBurst(g,P,color,R,cb){
+  var ring=svgEl('circle',{cx:P.x,cy:P.y,r:2,fill:'none',stroke:color,'stroke-width':3});
+  var flash=svgEl('circle',{cx:P.x,cy:P.y,r:6,fill:'#fff','fill-opacity':0.9});
+  g.appendChild(ring); g.appendChild(flash);
+  fxAnimate(560,function(t){ ring.setAttribute('r',2+R*t); ring.setAttribute('stroke-opacity',1-t); flash.setAttribute('r',6+16*t); flash.setAttribute('fill-opacity',Math.max(0,0.9-1.4*t)); },cb);
+}
+function fxFizzle(g,P,cb){
+  var puff=svgEl('circle',{cx:P.x,cy:P.y,r:3,fill:'#9aa6b5','fill-opacity':0.75});
+  g.appendChild(puff);
+  fxAnimate(560,function(t){ puff.setAttribute('r',3+15*t); puff.setAttribute('fill-opacity',Math.max(0,0.75-0.95*t)); puff.setAttribute('cy',P.y-10*t); },cb);
+}
+function fxBigBlast(g,P,cb){
+  var maparea=document.querySelector('.maparea'); if(maparea){ maparea.classList.add('shake'); setTimeout(function(){maparea.classList.remove('shake');},560); }
+  nukeFlash();
+  var fire=svgEl('circle',{cx:P.x,cy:P.y,r:6,fill:'#ffb44a','fill-opacity':0.95});
+  var flash=svgEl('circle',{cx:P.x,cy:P.y,r:8,fill:'#fff'});
+  var ring=svgEl('circle',{cx:P.x,cy:P.y,r:4,fill:'none',stroke:'#ffe0a0','stroke-width':4});
+  var ring2=svgEl('circle',{cx:P.x,cy:P.y,r:2,fill:'none',stroke:'#d8613a','stroke-width':3});
+  g.appendChild(fire); g.appendChild(flash); g.appendChild(ring); g.appendChild(ring2);
+  fxAnimate(820,function(t){
+    flash.setAttribute('r',8+46*t); flash.setAttribute('fill-opacity',Math.max(0,1-2.3*t));
+    fire.setAttribute('r',6+74*t); fire.setAttribute('fill-opacity',Math.max(0,0.95-1.05*t));
+    ring.setAttribute('r',4+130*t); ring.setAttribute('stroke-opacity',Math.max(0,1-t)); ring.setAttribute('stroke-width',Math.max(0.5,4-3.4*t));
+    ring2.setAttribute('r',2+92*t); ring2.setAttribute('stroke-opacity',Math.max(0,0.9-t));
+  },cb);
 }
 
 /* ---- modal / drawer / toast ---- */
@@ -1583,7 +1730,7 @@ function openHelp(){
   b+=sec('','Maneuver','Make one move of troops between two connected lands to shore up a border, then end your turn.');
   b+=sec('var(--crop)','Resources and feeding','Farms give <b>crops</b>, mills give <b>steel</b>, refineries give <b>gas</b>, and every land pays <b>coin</b> in tax. Each troop eats one crop per turn. If you cannot feed them all, the unfed troops risk deserting, so keep your farms ahead of your army.');
   b+=sec('#e8b45f','The market','Prices move with supply and demand on one shared market. <b>Selling</b> drops a price, <b>buying</b> lifts it, and a spread means round trips lose a little. Prices drift back toward normal over a few turns. Sell surplus crops for coin, or buy the steel and gas you need to build and fight.');
-  b+=sec('#7fbfe0','Ships and the sea','Water is crossable only by ship. Build ships in the Shipyard while you hold a coastal land. Each ship carries up to ten troops, so a big army sails as several ships in one invasion. In March, attack an across-water coast from your own coast; in Maneuver, ferry troops between your coasts.');
+  b+=sec('#7fbfe0','Ships and the sea','Water is crossable only by ship. Build ships in the Shipyard while you hold a coastal land. Each ship carries up to ten troops, so a big army sails as several ships in one invasion. Crossings cost gas <b>for every sea space</b> between the two coasts, so short hops are cheap and distant shores are dear. In March, attack an across-water coast from your own coast; in Maneuver, ferry troops between your coasts.');
   b+=sec('var(--ember)','Arms and nukes','Forge a <b>launcher</b> to fire from and an <b>interceptor</b> to defend. A fired nuke hits an undefended target two times in three. The defender may fire a salvo of <b>rockets</b>, declared all at once, each with a two-in-three chance to shoot it down. A hit leaves a permanent crater no one can ever hold.');
   b+=sec('','Concede and save','A human player may concede from the menu at any time. An AI never will. Games save automatically, so you can quit to the menu and resume the campaign later.');
   b+='<div class="mbtns" style="margin-top:14px"><button class="mbtn primary" onclick="closeModal()">Close</button></div>';
