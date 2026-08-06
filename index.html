@@ -1399,7 +1399,7 @@ function openMarket(){
     [1,10,50,'half','all'].forEach(function(q){ h+='<button onclick="doSell(\''+k+'\',\''+q+'\')">'+(q==='half'?'Half':q==='all'?'All':q)+'</button>'; });
     h+='</div>';
     h+='<div class="mkt-buy"><span class="mkt-tag">Buy</span>';
-    [10,50,'max'].forEach(function(q){ h+='<button onclick="doBuy(\''+k+'\',\''+q+'\')">'+(q==='max'?'Max':q)+'</button>'; });
+    [1,10,50,'half','all'].forEach(function(q){ h+='<button onclick="doBuy(\''+k+'\',\''+q+'\')">'+(q==='half'?'Half':q==='all'?'All':q)+'</button>'; });
     h+='</div>';
     return h;
   }
@@ -1416,8 +1416,10 @@ function doSell(k,q){
   toast('Sold '+r.units+' '+k+' for '+r.coin+' coin.'); save(); openMarket(); render();
 }
 function doBuy(k,q){
-  var pl=S.players[S.turn]; var units;
-  if(q==='max')units=Math.floor(pl.coin/E.buyUnit(S,k)); else units=parseInt(q,10);
+  var pl=S.players[S.turn]; var unit=E.buyUnit(S,k); var units;
+  if(q==='all')units=Math.floor(pl.coin/unit);
+  else if(q==='half')units=Math.floor((pl.coin/2)/unit);
+  else units=parseInt(q,10);
   var r=E.buy(S,S.turn,k,units); if(!r.ok){toast(r.msg);return;}
   toast('Bought '+r.units+' '+k+' for '+r.cost+' coin.'); save(); openMarket(); render();
 }
