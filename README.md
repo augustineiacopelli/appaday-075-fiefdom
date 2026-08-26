@@ -23,7 +23,7 @@ The market trades both ways and its prices move with supply and demand on a sing
 
 ## Fleets and invasion
 
-Ships are a pooled fleet you build for steel while you hold at least one coastal land. Each ship carries up to ten troops, and a larger stack simply sails as more ships in one combined invasion, so a forty-troop army crosses as four ships. Crossing costs gas per ship, and ships spend for the turn and return to your pool next turn. The same fleet also ferries troops between your own coasts during Maneuver.
+Ships are a pooled fleet you build for steel while you hold at least one coastal land. Each ship carries up to ten troops, and a larger stack simply sails as more ships in one combined invasion, so a forty-troop army crosses as four ships. Crossing costs gas for every sea space between the two coasts, so short hops are cheap and distant shores are dear, and ships spend for the turn and return to your pool next turn. The same fleet also ferries troops between your own coasts during Maneuver.
 
 ## The nuclear endgame
 
@@ -32,6 +32,10 @@ Launchers, interceptors, nukes, and rockets are forged from steel, with the firs
 ## The rival houses
 
 AI opponents run their own economy, trade at the market, raise fleets, and press their own attacks at three levels of cunning. When a rival takes its turn, a panel narrates its moves step by step, what it built, whom it took land from, whether it sailed a fleet or launched a nuke, and the full account is kept in the Chronicle for review.
+
+## Setting up a game
+
+Before you raise your banner, choose how many humans play hotseat at this device and how many rival houses join as AI, pick the AI's cunning, and set the **map size**. Map size defaults to a sensible territory count for how many players are seated, but a stepper lets you widen it for a sprawling multi-continent campaign or shrink it for a tight, fast game, with a one-tap reset back to the recommended size. Whatever size you choose, every house always starts with an equal number of home territories.
 
 ## Learning the game
 
@@ -43,7 +47,7 @@ Victory is simple: outlast every rival house and the realm is yours. A human pla
 
 ## Technical notes
 
-Single-file vanilla HTML, CSS, and JavaScript with Google Fonts as the only external dependency. The map generator, game engine, and AI are pure logic validated headlessly across six hundred full games with no crashes and no unresolved games, and the interface was smoke-tested through every phase, menu, the market, the tutorial, and the AI narrative. The renderer is SVG rather than canvas, all modals are custom, and local storage is guarded, so the app runs cleanly inside sandboxed WebKit as well as everywhere else. Fully responsive from a 375px phone through desktop.
+Single-file vanilla HTML, CSS, and JavaScript with Google Fonts as the only external dependency. The map generator, game engine, and AI are pure logic validated headlessly across six hundred full games with no crashes and no unresolved games, at map sizes from thirty territories up to one hundred forty, and the interface was smoke-tested through every phase, menu, the market, the tutorial, and the AI narrative. The game screen is locked to the viewport so the map, HUD, and controls fit on one screen without page scrolling. The renderer is SVG rather than canvas, all modals are custom, and local storage is guarded, so the app runs cleanly inside sandboxed WebKit as well as everywhere else. Fully responsive from a 375px phone through desktop.
 
 ---
 
