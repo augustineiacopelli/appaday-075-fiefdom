@@ -18,11 +18,11 @@
     --shadow:0 18px 44px rgba(0,0,0,.55);
   }
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-  html,body{margin:0;padding:0}
+  html,body{margin:0;padding:0;height:100%}
   body{
     font-family:'Inter',system-ui,sans-serif;
     background:radial-gradient(1200px 700px at 50% -10%,#1e2736 0%,transparent 60%),radial-gradient(900px 600px at 100% 110%,#191b2a 0%,transparent 55%),var(--ink);
-    color:var(--text);min-height:100dvh;display:flex;flex-direction:column;overflow-x:hidden;
+    color:var(--text);height:100dvh;display:flex;flex-direction:column;overflow:hidden;
   }
   button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
   .cz{font-family:'Cinzel',serif}
@@ -35,8 +35,8 @@
   .shell{flex:1;display:flex;flex-direction:column;min-height:0}
 
   /* setup */
-  .setup{flex:1;display:flex;align-items:center;justify-content:center;padding:22px 16px}
-  .setup-card{width:100%;max-width:520px;background:linear-gradient(180deg,var(--panel),var(--ink2));border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);padding:28px 26px 24px}
+  .setup{flex:1;display:flex;align-items:flex-start;justify-content:center;padding:22px 16px;overflow-y:auto;min-height:0}
+  .setup-card{width:100%;max-width:520px;margin:auto 0;background:linear-gradient(180deg,var(--panel),var(--ink2));border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);padding:28px 26px 24px}
   .crest{width:62px;height:62px;margin:0 auto 12px;display:flex;align-items:center;justify-content:center;border-radius:50%;background:radial-gradient(circle at 50% 35%,#2b3548,#161d29);border:2px solid var(--brass);box-shadow:0 0 0 4px rgba(200,151,74,.12),var(--shadow)}
   .crest svg{width:34px;height:34px}
   .setup h1{font-family:'Cinzel',serif;font-weight:700;font-size:30px;letter-spacing:4px;text-align:center;margin:0 0 4px;color:var(--parch)}
@@ -56,6 +56,8 @@
   .cnt .cval{flex:1;text-align:center;font-size:22px;font-weight:800;color:var(--parch)}
   .cnt .cval small{display:block;font-size:10px;color:var(--dim);letter-spacing:1px;text-transform:uppercase;font-weight:600}
   .startbtn{width:100%;margin-top:8px;padding:15px;border-radius:12px;font-family:'Cinzel',serif;font-weight:700;letter-spacing:2px;font-size:16px;color:var(--ink);background:linear-gradient(180deg,var(--brass-bright),var(--brass));box-shadow:0 6px 18px rgba(200,151,74,.3);transition:.15s}
+  .area-auto{display:block;margin:8px auto 0;background:none;border:none;color:var(--brass-bright);font-size:11.5px;font-weight:600}
+  .area-auto:hover{text-decoration:underline}
   .startbtn:hover{transform:translateY(-1px)}
   .resume{width:100%;margin-top:10px;padding:12px;border-radius:11px;font-weight:600;font-size:13.5px;color:var(--muted);border:1px solid var(--line);background:var(--panel2)}
   .resume:hover{color:var(--text);border-color:var(--brass)}
@@ -267,6 +269,11 @@
           <button class="opt on" data-d="knight">Knight<small>even</small></button>
           <button class="opt" data-d="warlord">Warlord<small>ruthless</small></button>
         </div>
+      </div>
+      <div class="field">
+        <div class="field-label">Map size <span id="areaLbl">Auto</span></div>
+        <div class="cnt"><button class="cbtn" onclick="adjArea(-5)">&minus;</button><div class="cval" id="areaVal">66<small id="areaSub">territories &middot; auto</small></div><button class="cbtn" onclick="adjArea(5)">+</button></div>
+        <button class="area-auto" id="areaAutoBtn" style="display:none" onclick="setAreaAuto()">Reset to auto</button>
       </div>
       <button class="startbtn" onclick="startGame()">RAISE YOUR BANNER</button>
       <button class="resume" id="resumeBtn" style="display:none" onclick="resumeGame()">Resume last campaign</button>
@@ -1039,9 +1046,10 @@ root.FiefAI={ buildTurn, marchTurn, maneuverTurn, takeTurn, DIFF };
 <script>
 /* ================= UI ================= */
 var E=window.FiefEngine, AI=window.FiefAI, C=E.C;
-var S=null, world=null, cfg={h:1,a:2,d:'knight'};
+var S=null, world=null, cfg={h:1,a:2,d:'knight',areas:null};
 var sel=-1, atkFrom=-1, nukeFrom=-1, uimode='';
 var SAVE='fiefdom2_save';
+var AREA_MIN=30, AREA_MAX=140;
 
 /* setup controls */
 function adjP(which,delta){
@@ -1051,6 +1059,7 @@ function adjP(which,delta){
   document.getElementById('aVal').innerHTML=cfg.a+'<small id="totLbl">'+(cfg.h+cfg.a)+' houses total</small>';
   document.getElementById('hLbl').textContent=cfg.h;
   document.getElementById('aLbl').textContent=cfg.a;
+  renderAreaField();
 }
 document.getElementById('diffOpts').addEventListener('click',function(e){
   var b=e.target.closest('.opt'); if(!b)return;
@@ -1059,11 +1068,25 @@ document.getElementById('diffOpts').addEventListener('click',function(e){
 });
 
 function mapTarget(total){ return total<=2?50: total===3?56: total===4?66: total===5?76:88; }
+function renderAreaField(){
+  var auto=mapTarget(cfg.h+cfg.a);
+  var val=cfg.areas!=null?cfg.areas:auto;
+  document.getElementById('areaVal').innerHTML=val+'<small id="areaSub">territories'+(cfg.areas!=null?'':' &middot; auto')+'</small>';
+  document.getElementById('areaLbl').textContent=cfg.areas!=null?'Custom':'Auto';
+  document.getElementById('areaAutoBtn').style.display=cfg.areas!=null?'block':'none';
+}
+function adjArea(delta){
+  var auto=mapTarget(cfg.h+cfg.a);
+  var cur=cfg.areas!=null?cfg.areas:auto;
+  cfg.areas=Math.max(AREA_MIN,Math.min(AREA_MAX,cur+delta));
+  renderAreaField();
+}
+function setAreaAuto(){ cfg.areas=null; renderAreaField(); }
 
 function startGame(){
   var total=cfg.h+cfg.a;
   var seed=(Date.now()^(Math.random()*1e9))>>>0;
-  world=generateWorld(seed, mapTarget(total));
+  world=generateWorld(seed, cfg.areas!=null?cfg.areas:mapTarget(total));
   S=E.newGame(world, cfg.h, cfg.a, cfg.d);
   LOG=[]; tut={on:false,shown:{}};
   enterGame();
@@ -1726,6 +1749,7 @@ function openHelp(){
   function sec(color,title,text){ return '<div class="help-sec"><div class="help-h">'+(color?'<span class="hi" style="background:'+color+'"></span>':'')+title+'</div><p class="help-p">'+text+'</p></div>'; }
   var b='<h2>How to Play</h2><p class="msub">Rule a realm of land and sea. Outlast every rival house.</p>';
   b+=sec('','The goal','Conquer the map. You win when yours is the last house left standing. If more than five nukes ever detonate, nuclear winter ends the game and everyone loses.');
+  b+=sec('','Setting up','Before you begin, you can set the number of humans and AI houses, the AI cunning, and the <b>map size</b>. Map size defaults to a sensible territory count for your player count, but you can widen or shrink it from the setup screen.');
   b+=sec('var(--brass-bright)','Your turn: three phases','Every turn runs <b>Court</b>, then <b>March</b>, then <b>Maneuver</b>. Use the button on the right of the action bar to move to the next phase.');
   b+=sec('','Court','Income arrives first. Tap one of your lands to make it a <b>farm</b>, <b>steel mill</b>, or <b>refinery</b>, to <b>hire</b> troops for coin, and to build launchers or interceptors. Place your free <b>muster</b> troops on the lands that need them, and visit the Shipyard, Arsenal, and Market.');
   b+=sec('','March','Tap one of your lands holding two or more troops, then tap a bordering enemy or neutral land to attack. Combat is decided by dice: roll once or blitz. If you break the defenders, your troops take the land.');
