@@ -22,8 +22,15 @@
   body{
     font-family:'Inter',system-ui,sans-serif;
     background:radial-gradient(1200px 700px at 50% -10%,#1e2736 0%,transparent 60%),radial-gradient(900px 600px at 100% 110%,#191b2a 0%,transparent 55%),var(--ink);
-    color:var(--text);height:100dvh;display:flex;flex-direction:column;overflow:hidden;
+    color:var(--text);height:100dvh;height:calc(var(--app-vh, 1vh) * 100);display:flex;flex-direction:column;overflow:hidden;
   }
+  .rotate-block{position:fixed;inset:0;z-index:80;background:linear-gradient(180deg,var(--ink2),var(--ink));display:none;flex-direction:column;align-items:center;justify-content:center;padding:30px;text-align:center}
+  .rb-icon{width:64px;height:64px;margin-bottom:16px;animation:rbspin 1.8s ease-in-out infinite}
+  .rb-icon svg{width:100%;height:100%}
+  @keyframes rbspin{0%,60%,100%{transform:rotate(0)}30%{transform:rotate(-90deg)}}
+  .rb-title{font-size:19px;letter-spacing:2px;color:var(--parch);margin-bottom:8px}
+  .rb-sub{font-size:13.5px;color:var(--muted);max-width:340px;line-height:1.5}
+  @media (orientation: portrait){ .rotate-block{display:flex} }
   button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
   .cz{font-family:'Cinzel',serif}
   .topbar{display:flex;align-items:center;gap:12px;padding:9px 15px;border-bottom:1px solid var(--line);background:linear-gradient(180deg,rgba(24,31,44,.9),rgba(18,22,31,.75));flex-shrink:0}
@@ -327,6 +334,11 @@
 </div>
 <div class="toast" id="toast"></div>
 <div class="nukeflash" id="nukeflash"></div>
+<div class="rotate-block" id="rotateBlock">
+  <div class="rb-icon"><svg viewBox="0 0 24 24" fill="none"><rect x="3" y="6" width="14" height="9" rx="1.6" stroke="#e8b45f" stroke-width="1.6"/><path d="M20 8.5V6a1 1 0 00-1-1h-2.5" stroke="#93a1bb" stroke-width="1.5" stroke-linecap="round"/><path d="M20 15.5V18a1 1 0 01-1 1h-2.5" stroke="#93a1bb" stroke-width="1.5" stroke-linecap="round"/><path d="M19 8l1.6-1.6M19 8l-1.6-1.6" stroke="#93a1bb" stroke-width="1.4" stroke-linecap="round"/></svg></div>
+  <div class="rb-title cz">ROTATE YOUR DEVICE</div>
+  <div class="rb-sub">Fiefdom is built for landscape. Turn your device sideways to raise your banner.</div>
+</div>
 
 <script>// ---- Fiefdom II world generator: Voronoi territories, oceans, coasts, sea routes ----
 function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;var t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
@@ -370,9 +382,9 @@ function voronoiCell(site, sites, W, H){
   return poly;
 }
 
-function generateWorld(seed, targetCells){
+function generateWorld(seed, targetCells, wantAspect){
   const R=mulberry32(seed);
-  const W=1000, H=680;
+  const H=680, W=Math.round(H*(wantAspect||(1000/680)));
   const aspect=W/H;
   let rows=Math.max(4,Math.round(Math.sqrt(targetCells/aspect)));
   let cols=Math.max(4,Math.round(targetCells/rows));
@@ -1083,12 +1095,18 @@ function adjArea(delta){
 }
 function setAreaAuto(){ cfg.areas=null; renderAreaField(); }
 
+function deviceAspect(){
+  var a = window.innerWidth / Math.max(1,window.innerHeight);
+  return Math.max(1.25, Math.min(2.35, a));
+}
+function setMapViewBox(w,h){ var m=document.getElementById('map'); if(m) m.setAttribute('viewBox','0 0 '+w+' '+h); }
 function startGame(){
   var total=cfg.h+cfg.a;
   var seed=(Date.now()^(Math.random()*1e9))>>>0;
-  world=generateWorld(seed, cfg.areas!=null?cfg.areas:mapTarget(total));
+  world=generateWorld(seed, cfg.areas!=null?cfg.areas:mapTarget(total), deviceAspect());
   S=E.newGame(world, cfg.h, cfg.a, cfg.d);
   LOG=[]; tut={on:false,shown:{}};
+  setMapViewBox(S.W,S.H);
   enterGame();
   save();
   routeTurn(true);
@@ -1101,6 +1119,7 @@ function resumeGame(){
     if(!S.market) S.market={ crops:C.MKT_BASE.crops, steel:C.MKT_BASE.steel, gas:C.MKT_BASE.gas };
     world=S;
     cfg.h=S.players.filter(function(p){return !p.isAI;}).length;
+    setMapViewBox(S.W||1000,S.H||680);
     enterGame(); routeTurn(true);
   }catch(e){ toast('Could not resume'); }
 }
@@ -1266,7 +1285,7 @@ function renderMap(){
     svg+='<rect class="cnt-pill" x="'+(c.x-14)+'" y="'+(c.y-1)+'" rx="9" width="28" height="19" stroke="'+ring+'"/>';
     svg+='<text class="cnt-txt" x="'+c.x+'" y="'+(c.y+12.5)+'" font-size="12.5">'+t+'</text>';
   }
-  var defs='<defs><radialGradient id="ocean" cx="50%" cy="45%" r="75%"><stop offset="0%" stop-color="#1d3a54"/><stop offset="100%" stop-color="#0f2032"/></radialGradient></defs><rect width="1000" height="680" fill="#0f2032"/>';
+  var defs='<defs><radialGradient id="ocean" cx="50%" cy="45%" r="75%"><stop offset="0%" stop-color="#1d3a54"/><stop offset="100%" stop-color="#0f2032"/></radialGradient></defs><rect width="'+S.W+'" height="'+S.H+'" fill="#0f2032"/>';
   document.getElementById('map').innerHTML=defs+svg;
 }
 document.getElementById('map').addEventListener('click',function(e){
@@ -1766,9 +1785,10 @@ function openHelp(){
 function startTutorial(){
   cfg.h=1; cfg.a=1; cfg.d='squire';
   var seed=(Date.now()^(Math.random()*1e9))>>>0;
-  world=generateWorld(seed, 50);
+  world=generateWorld(seed, 50, deviceAspect());
   S=E.newGame(world, 1, 1, 'squire');
   LOG=[]; tut={on:true, shown:{}};
+  setMapViewBox(S.W,S.H);
   enterGame(); save(); routeTurn(true);
 }
 var COACH_TEXT={
@@ -1786,6 +1806,18 @@ function coach(key){
   c.classList.add('on'); document.body.classList.add('coach-live');
 }
 function dismissCoach(){ document.getElementById('coach').classList.remove('on'); document.body.classList.remove('coach-live'); }
+
+/* ---- viewport height fix (mobile rotate/resize bugs) ---- */
+function syncVH(){ document.documentElement.style.setProperty('--app-vh', (window.innerHeight*0.01)+'px'); }
+function forceReflow(){
+  syncVH();
+  document.body.style.display='none'; void document.body.offsetHeight; document.body.style.display='flex';
+  if(S){ render(); }
+}
+syncVH();
+window.addEventListener('resize', syncVH);
+window.addEventListener('orientationchange', function(){ setTimeout(forceReflow, 60); setTimeout(forceReflow, 300); });
+if(window.visualViewport){ window.visualViewport.addEventListener('resize', syncVH); }
 
 /* init */
 (function init(){ document.getElementById('resumeBtn').style.display=hasSave()?'block':'none'; adjP('h',0); })();
